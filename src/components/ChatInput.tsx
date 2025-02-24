@@ -18,13 +18,13 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border-t p-4">
-      <div className="flex space-x-4">
+    <form onSubmit={handleSubmit} className="border-t p-3 bg-gray-50">
+      <div className="flex space-x-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-1 border rounded-lg p-2"
+          className="flex-1 border rounded-lg p-2 text-gray-800 bg-white"
           placeholder="Escribe un mensaje..."
           disabled={isLoading}
         />
@@ -33,7 +33,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
           className={`px-4 py-2 rounded-lg text-white ${
             isLoading 
               ? 'bg-blue-300 cursor-not-allowed' 
-              : 'bg-blue-500 hover:bg-blue-600'
+              : 'bg-blue-600 hover:bg-blue-700'
           }`}
           disabled={isLoading}
         >

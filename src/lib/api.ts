@@ -1,6 +1,6 @@
 // lib/api.ts
 export async function sendMessageToWebhook(message: ChatMessage): Promise<ApiResponse> {
-    const response = await fetch('https://primary-production-41b1.up.railway.app/webhook-test/alma', {
+    const response = await fetch('https://primary-production-41b1.up.railway.app/webhook/alma', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
