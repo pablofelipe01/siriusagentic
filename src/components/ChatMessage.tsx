@@ -1,5 +1,5 @@
-// components/ChatMessage.tsx
 import { Message } from '@/types/chat'
+import { CustomAudioPlayer } from './CustomAudioPlayer'
 
 interface ChatMessageProps {
   message: Message
@@ -15,16 +15,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
           isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
         }`}
       >
-        {/* Distinguimos si es texto o audio */}
+        {/* Mensaje de texto */}
         {message.type === 'text' && (
           <p>{message.content}</p>
         )}
 
+        {/* Mensaje de audio con reproductor personalizado */}
         {message.type === 'audio' && message.audioUrl && (
-          <audio controls>
-            <source src={message.audioUrl} type="audio/webm" />
-            Tu navegador no soporta la reproducción de audio.
-          </audio>
+          <CustomAudioPlayer 
+            src={message.audioUrl} 
+            isUser={isUser} 
+          />
         )}
 
         <div className="text-xs opacity-70 mt-1">
