@@ -1,19 +1,23 @@
 // types/chat.ts
-export type MessageType = 'text' | 'image' | 'audio' | 'video'
+
+export type MessageType = 'text' | 'audio'
 export type MessageSender = 'user' | 'bot'
 
 export interface Message {
   type: MessageType
   sender: MessageSender
-  content: string
+  content: string           // Texto del mensaje
+  audioUrl?: string         // URL (blob:) para reproducir audio
   timestamp: Date
 }
 
+// Estructura del body al recibir un POST desde Next a n8n
 export interface WebhookRequest {
   body: {
     messages: [{
       type: MessageType
-      text: string
+      text?: string
+      audio?: string        // base64 en caso de audio
       from: string
     }]
     contacts: [{
@@ -22,6 +26,7 @@ export interface WebhookRequest {
   }
 }
 
+// Respuesta que esperamos de n8n
 export interface WebhookResponse {
   success: boolean
   response: string
@@ -29,14 +34,4 @@ export interface WebhookResponse {
     timestamp: string
     sessionId: string
   }
-}
-
-// Interfaces auxiliares
-export interface ChatInputProps {
-  onSendMessage: (message: string) => void
-  isLoading: boolean
-}
-
-export interface ChatMessageProps {
-  message: Message
 }

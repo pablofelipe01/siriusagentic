@@ -6,7 +6,7 @@ import { Message, WebhookResponse } from '@/types/chat'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
 
-const N8N_WEBHOOK_URL = 'https://primary-production-41b1.up.railway.app/webhook/alma'
+const N8N_WEBHOOK_URL = 'https://primary-production-41b1.up.railway.app/webhook-test/alma'
 
 // Componente de formulario de login
 function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
@@ -15,13 +15,10 @@ function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Validación básica de email
     if (!email.includes('@') || !email.includes('.')) {
       setError('Por favor, introduce un email válido')
       return
     }
-    
     onLogin(email)
   }
 
@@ -31,9 +28,7 @@ function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
         <h2 className="text-2xl mb-6 text-center font-bold text-gray-800">Bienvenido al chat</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-800 font-medium mb-2">
-              Tu email:
-            </label>
+            <label className="block text-gray-800 font-medium mb-2">Tu email:</label>
             <input
               type="email"
               value={email}
@@ -62,7 +57,7 @@ export default function ChatPage() {
   const [userEmail, setUserEmail] = useState<string>('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  // Intenta recuperar el email guardado al cargar la página
+  // Recuperar email guardado
   useEffect(() => {
     const savedEmail = localStorage.getItem('userEmail')
     if (savedEmail) {
@@ -71,14 +66,12 @@ export default function ChatPage() {
     }
   }, [])
 
-  // Función para manejar el login
   const handleLogin = (email: string) => {
     setUserEmail(email)
     localStorage.setItem('userEmail', email)
     setIsLoggedIn(true)
   }
 
-  // Función para cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem('userEmail')
     setUserEmail('')
@@ -86,64 +79,129 @@ export default function ChatPage() {
     setMessages([])
   }
 
-  // Función para enviar mensajes
-  const handleSendMessage = async (content: string) => {
-    if (!content.trim() || isLoading) return
-    
+  // Función para convertir Blob a base64
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          // reader.result es algo como 'data:audio/webm;base64,AAAA...'
+          // split(',')[1] da el 'AAAA...' 
+          const base64 = reader.result.split(',')[1] || ''
+          resolve(base64)
+        } else {
+          reject(new Error('No se pudo convertir blob a base64'))
+        }
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
+
+  // Ahora podemos recibir un audioBlob opcional
+  const handleSendMessage = async (text: string, audioBlob?: Blob) => {
+    if ((!text.trim() && !audioBlob) || isLoading) return
     setIsLoading(true)
-    
-    // Añadir mensaje del usuario a la interfaz
-    const userMessage: Message = {
-      sender: 'user',
-      content,
-      timestamp: new Date()
+
+    // 1. Crear el mensaje local
+    let newUserMessage: Message
+    if (audioBlob) {
+      // Mensaje de audio
+      const audioUrl = URL.createObjectURL(audioBlob)
+      newUserMessage = {
+        type: 'audio',
+        sender: 'user',
+        content: '',
+        audioUrl,
+        timestamp: new Date()
+      }
+    } else {
+      // Mensaje de texto
+      newUserMessage = {
+        type: 'text',
+        sender: 'user',
+        content: text,
+        timestamp: new Date()
+      }
     }
-    setMessages(prev => [...prev, userMessage])
-    
+    setMessages(prev => [...prev, newUserMessage])
+
     try {
-      // Enviar mensaje al webhook
+      // 2. Preparar el body para el POST
+      let bodyToSend
+      if (audioBlob) {
+        // Convertir audio a base64
+        const base64Audio = await blobToBase64(audioBlob)
+
+        bodyToSend = {
+          body: {
+            messages: [
+              {
+                type: 'audio',
+                audio: base64Audio, // Aquí enviamos el base64
+                from: userEmail
+              }
+            ],
+            contacts: [
+              {
+                wa_id: userEmail
+              }
+            ]
+          }
+        }
+      } else {
+        // Mensaje de texto
+        bodyToSend = {
+          body: {
+            messages: [
+              {
+                type: 'text',
+                text,
+                from: userEmail
+              }
+            ],
+            contacts: [
+              {
+                wa_id: userEmail
+              }
+            ]
+          }
+        }
+      }
+
+      // 3. Hacer fetch al webhook
       const response = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          body: {
-            messages: [{
-              type: 'text',
-              text: content,
-              from: userEmail
-            }],
-            contacts: [{
-              wa_id: userEmail
-            }]
-          }
-        })
+        body: JSON.stringify(bodyToSend)
       })
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      // Procesar respuesta
+      // 4. Procesar la respuesta de n8n
       const data: WebhookResponse = await response.json()
-      
       if (data.success && data.response) {
+        // El bot contesta con texto (asumimos)
         const botMessage: Message = {
+          type: 'text',
           sender: 'bot',
           content: data.response,
           timestamp: new Date(data.metadata.timestamp)
         }
         setMessages(prev => [...prev, botMessage])
       }
-      
+
     } catch (error) {
-      console.error('Error sending message:', error)
-      // Añadir mensaje de error en la interfaz
+      console.error('Error al enviar mensaje:', error)
       const errorMessage: Message = {
+        type: 'text',
         sender: 'bot',
-        content: 'Lo siento, ha ocurrido un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.',
+        content: 'Lo siento, ocurrió un error al procesar tu mensaje.',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -152,12 +210,12 @@ export default function ChatPage() {
     }
   }
 
-  // Si no está logueado, mostrar formulario de login
+  // Interfaz de login
   if (!isLoggedIn) {
     return <LoginForm onLogin={handleLogin} />
   }
 
-  // Interfaz del chat
+  // Interfaz de chat
   return (
     <div className="flex flex-col h-screen">
       <div className="bg-blue-500 text-white p-3 flex flex-wrap justify-between items-center">
@@ -166,7 +224,7 @@ export default function ChatPage() {
           <span className="truncate max-w-[200px]" title={userEmail}>
             {userEmail.length > 20 ? userEmail.substring(0, 17) + '...' : userEmail}
           </span>
-          <button 
+          <button
             onClick={handleLogout}
             className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-sm whitespace-nowrap"
           >
@@ -174,11 +232,11 @@ export default function ChatPage() {
           </button>
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 mt-10">
-            <p>¡Bienvenido! Escribe un mensaje para comenzar la conversación.</p>
+            <p>¡Bienvenido! Escribe un mensaje o graba un audio para comenzar la conversación.</p>
           </div>
         ) : (
           messages.map((msg, idx) => (
@@ -186,7 +244,7 @@ export default function ChatPage() {
           ))
         )}
       </div>
-      
+
       <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </div>
   )
