@@ -6,7 +6,7 @@ import { Message, WebhookResponse } from '@/types/chat'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
 
-const N8N_WEBHOOK_URL = 'https://primary-production-41b1.up.railway.app/webhook-test/alma'
+const N8N_WEBHOOK_URL = 'https://primary-production-41b1.up.railway.app/webhook/alma'
 
 // Componente de formulario de login
 function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
