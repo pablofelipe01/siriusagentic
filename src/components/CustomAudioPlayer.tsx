@@ -7,7 +7,7 @@ interface AudioPlayerProps {
 
 export function CustomAudioPlayer({ src, isUser }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [duration, setDuration] = useState(0)
+  // const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState(false)

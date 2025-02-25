@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -65,12 +66,12 @@ export default function Home() {
             </div>
 
             <div className="mt-12">
-              <a
-                href="mailto: martin@siriusregenerative.com"
+              <Link
+                href="/chat"
                 className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-base h-12 px-8 mx-auto backdrop-blur-sm"
               >
-                Join the Waitlist
-              </a>
+                ALMA
+              </Link>
             </div>
           </div>
         </main>

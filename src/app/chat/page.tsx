@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react'
 import { Message, WebhookResponse } from '@/types/chat'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
+import Link from 'next/link'
+import { Home } from 'lucide-react'
 
 const N8N_WEBHOOK_URL = 'https://primary-production-41b1.up.railway.app/webhook/alma'
 
@@ -23,29 +25,39 @@ function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl mb-6 text-center font-bold text-gray-800">Bienvenido al chat</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-800 font-medium mb-2">Tu email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded-lg text-gray-800"
-              placeholder="ejemplo@dominio.com"
-              required
-            />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-          <button 
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
-          >
-            Comenzar chat
-          </button>
-        </form>
+    <div className="flex flex-col h-screen bg-gray-100">
+      {/* Cabecera con botón de inicio */}
+      <div className="bg-blue-500 text-white p-3 flex items-center">
+        <Link href="/" className="mr-4">
+          <Home size={24} className="text-white hover:text-blue-100" />
+        </Link>
+        <h1 className="text-xl font-bold">Alma</h1>
+      </div>
+
+      <div className="flex-1 flex justify-center items-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+          <h2 className="text-2xl mb-6 text-center font-bold text-gray-800">Bienvenido al chat</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-800 font-medium mb-2">Tu email:</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 border rounded-lg text-gray-800"
+                placeholder="ejemplo@dominio.com"
+                required
+              />
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            </div>
+            <button 
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+            >
+              Comenzar chat
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
@@ -218,11 +230,19 @@ export default function ChatPage() {
   // Interfaz de chat
   return (
     <div className="flex flex-col h-screen">
-      <div className="bg-blue-500 text-white p-3 flex flex-wrap justify-between items-center">
-        <h1 className="text-xl font-bold">Alma</h1>
-        <div className="flex items-center flex-wrap gap-2">
-          <span className="truncate max-w-[200px]" title={userEmail}>
+      <div className="bg-blue-500 text-white p-3 flex items-center justify-between">
+        <div className="flex items-center">
+          <Link href="/" className="mr-3">
+            <Home size={24} className="text-white hover:text-blue-100" />
+          </Link>
+          <h1 className="text-xl font-bold">Alma</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:inline truncate max-w-[200px]" title={userEmail}>
             {userEmail.length > 20 ? userEmail.substring(0, 17) + '...' : userEmail}
+          </span>
+          <span className="sm:hidden truncate max-w-[120px]" title={userEmail}>
+            {userEmail.length > 10 ? userEmail.substring(0, 7) + '...' : userEmail}
           </span>
           <button
             onClick={handleLogout}
