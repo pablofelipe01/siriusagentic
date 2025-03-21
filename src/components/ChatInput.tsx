@@ -26,6 +26,18 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       // Si ya estamos grabando, detenemos
       mediaRecorderRef.current?.stop()
       setIsRecording(false)
+      
+      // Enviar automáticamente el audio después de detener la grabación
+      setTimeout(() => {
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+          onSendMessage(input.trim(), audioBlob, undefined, undefined)
+          
+          // Reset
+          setInput('')
+          audioChunksRef.current = []
+        }
+      }, 500); // Pequeño retraso para asegurarnos que se captura todo el audio
     } else {
       // Intentar acceder al micrófono
       try {
