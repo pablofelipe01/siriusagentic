@@ -1,6 +1,6 @@
 // lib/api.ts
 export async function sendMessageToWebhook(message: ChatMessage): Promise<ApiResponse> {
-    const response = await fetch('https://primary-production-41b1.up.railway.app/webhook/alma', {
+    const response = await fetch('https://n8n-sirius-agentic.onrender.com/webhook/directo', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

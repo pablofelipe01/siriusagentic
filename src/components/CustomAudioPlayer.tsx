@@ -1,152 +1,133 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react';
 
 interface AudioPlayerProps {
-  src: string
+  // src: string     <--- Si solamente tienes un src, ver ejemplo de “doble <source>” más abajo
+  srcWebm: string,   // Ejemplo: URL WebM (puede ser blob:)
+  srcMp3?: string,   // Ejemplo: URL MP3 fallback (opcional)
   isUser: boolean
 }
 
-export function CustomAudioPlayer({ src, isUser }: AudioPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  // const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [isReady, setIsReady] = useState(false)
-  const [error, setError] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
+export function CustomAudioPlayer({ srcWebm, srcMp3, isUser }: AudioPlayerProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);          // Duración total
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    // Cargar metadatos del audio (duración)
+    // Evento: metadatos cargados (nos da duración, etc.)
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration)
-    }
+      setDuration(audio.duration || 0);
+    };
 
-    // Cuando el audio está listo para reproducirse
+    // Cuando el audio está listo para reproducir
     const handleCanPlay = () => {
-      setIsReady(true)
-      setError(false)
-    }
+      setIsReady(true);
+      setError(false);
+    };
 
-    // Actualizar tiempo actual durante la reproducción
+    // Actualizar tiempo actual
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime)
-    }
+      setCurrentTime(audio.currentTime);
+    };
 
-    // Evento cuando finaliza la reproducción
+    // Al terminar la reproducción
     const handleEnded = () => {
-      setIsPlaying(false)
-      setCurrentTime(0)
-    }
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
 
-    // Manejar errores
+    // Manejo de errores
     const handleError = (e: Event) => {
-      console.error('Error al cargar o reproducir el audio:', e)
-      setError(true)
-      setIsReady(false)
-      setIsPlaying(false)
-    }
+      console.error('Error al cargar/reproducir audio:', e);
+      setError(true);
+      setIsReady(false);
+      setIsPlaying(false);
+    };
 
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
-    audio.addEventListener('canplay', handleCanPlay)
-    audio.addEventListener('timeupdate', handleTimeUpdate)
-    audio.addEventListener('ended', handleEnded)
-    audio.addEventListener('error', handleError)
+    // Suscribir eventos
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
-    // Safari a veces necesita una carga explícita
-    audio.load()
+    // Safari a veces necesita invocar load() explícitamente
+    audio.load();
 
     return () => {
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      audio.removeEventListener('canplay', handleCanPlay)
-      audio.removeEventListener('timeupdate', handleTimeUpdate)
-      audio.removeEventListener('ended', handleEnded)
-      audio.removeEventListener('error', handleError)
-    }
-  }, [src]) // Recargar cuando cambie la fuente
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, [srcWebm, srcMp3]);
 
-  // Toggle reproducción con manejo específico para Safari
+  // Inicia/pausa la reproducción
   const togglePlay = () => {
-    if (!audioRef.current || !isReady) return
+    const audio = audioRef.current;
+    if (!audio || !isReady) return;
 
-    const playPromise = isPlaying 
-      ? audioRef.current.pause() 
-      : audioRef.current.play()
-    
-    // Safari puede devolver undefined en lugar de una promesa
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(!isPlaying)
-        })
-        .catch(error => {
-          console.error('Error al reproducir:', error)
-          // Muchos navegadores (incluyendo Safari) requieren interacción del usuario
-          // antes de permitir la reproducción automática
-          setIsPlaying(false)
-        })
+    if (!isPlaying) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch(err => {
+            console.error('Error al reproducir:', err);
+            setIsPlaying(false);
+          });
+      } else {
+        // Navegadores antiguos (Safari) que no devuelven Promise en .play()
+        setIsPlaying(true);
+      }
     } else {
-      // Para navegadores que no devuelven una promesa (como versiones antiguas de Safari)
-      setIsPlaying(!isPlaying)
+      audio.pause();
+      setIsPlaying(false);
     }
-  }
+  };
 
-  // Formatear tiempo en MM:SS
+  // Formatear tiempo M:SS
   const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60)
-    const seconds = Math.floor(time % 60)
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
-  }
-
-  // Extraer tipo MIME del src (para blob URLs usamos webm como fallback)
-  const getMimeType = () => {
-    if (src.startsWith('blob:')) {
-      return 'audio/webm' // Asumimos WebM para blobs creados en la app
-    }
-    // Para URLs normales, intentar determinar por extensión
-    const extension = src.split('.').pop()?.toLowerCase()
-    switch (extension) {
-      case 'mp3': return 'audio/mpeg'
-      case 'm4a': return 'audio/mp4'
-      case 'ogg': return 'audio/ogg'
-      case 'wav': return 'audio/wav'
-      default: return 'audio/webm'
-    }
-  }
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
 
   return (
     <div className="w-full my-1">
-      {/* Audio nativo oculto con múltiples fuentes para compatibilidad */}
-      <audio 
-        ref={audioRef} 
-        preload="metadata"
-        // Importante: No usar controls aquí ya que usamos nuestra propia UI
-      >
-        {/* La fuente principal (probablemente webm de la grabación) */}
-        <source src={src} type={getMimeType()} />
-        {/* Fallback para Safari si tenemos una versión MP3 (en este caso no tenemos) */}
-        {/* <source src={src.replace('.webm', '.mp3')} type="audio/mpeg" /> */}
+      {/* Audio oculto (nuestra UI es custom) */}
+      <audio ref={audioRef} preload="metadata">
+        {/* Fuente principal: WebM */}
+        <source src={srcWebm} type="audio/webm" />
+        {/* Fallback MP3 (solo si tenemos srcMp3) */}
+        {srcMp3 && <source src={srcMp3} type="audio/mpeg" />}
         Tu navegador no soporta la reproducción de audio.
       </audio>
-      
-      {/* UI simplificada: solo botón play y tiempo */}
+
+      {/* Controles custom */}
       <div 
         className="flex items-center gap-2 w-full"
-        style={{ 
+        style={{
           minHeight: '36px',
           backgroundColor: isUser ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)',
           borderRadius: '12px',
-          padding: '4px 8px'
+          padding: '4px 8px',
         }}
       >
-        {/* Botón de reproducción */}
-        <button 
+        {/* Botón Play/Pause/Error */}
+        <button
           onClick={togglePlay}
           disabled={!isReady || error}
           className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center 
             ${(!isReady || error) ? 'opacity-50' : 'opacity-100'}`}
-          style={{ 
-            backgroundColor: isUser ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'
+          style={{
+            backgroundColor: isUser ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
           }}
         >
           {error ? (
@@ -157,27 +138,26 @@ export function CustomAudioPlayer({ src, isUser }: AudioPlayerProps) {
               <rect x="11" y="18" width="2" height="2" fill={isUser ? "black" : "white"} />
             </svg>
           ) : isPlaying ? (
-            // Icono de pausa
+            // Icono Pausa
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <rect x="6" y="4" width="4" height="16" fill={isUser ? "white" : "black"} />
               <rect x="14" y="4" width="4" height="16" fill={isUser ? "white" : "black"} />
             </svg>
           ) : (
-            // Icono de reproducción
+            // Icono Play
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path d="M5 3L19 12L5 21V3Z" fill={isUser ? "white" : "black"} />
             </svg>
           )}
         </button>
-        
-        {/* Espacio vacío flexible para ocupar el centro */}
+
         <div className="flex-1"></div>
-        
-        {/* Solo tiempo actual */}
+
+        {/* currentTime / duration */}
         <div className="text-xs opacity-80 min-w-[42px] text-right">
-          {formatTime(currentTime)}
+          {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
     </div>
-  )
+  );
 }
