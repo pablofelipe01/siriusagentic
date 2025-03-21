@@ -6,7 +6,6 @@ import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
 import { LoginForm } from '@/components/LoginForm'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Home, User } from 'lucide-react'
 
 const N8N_WEBHOOK_URL = 'https://n8n-sirius-agentic.onrender.com/webhook/directo'
@@ -296,23 +295,11 @@ export default function ChatPage() {
     return <LoginForm onLogin={handleLogin} />
   }
 
-  // Interfaz de chat con imagen de fondo
+  // Interfaz de chat sin imagen de fondo
   return (
     <div className="fixed inset-0 flex flex-col chat-container">
-      {/* Imagen de fondo */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/h6.png"
-          alt="Background"
-          fill
-          priority
-          className="object-cover opacity-09"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/30" />
-      </div>
-      
       {/* Contenido del chat */}
-      <div className="relative z-10 flex flex-col h-full w-full overflow-hidden">
+      <div className="flex flex-col h-full w-full overflow-hidden">
         {/* Cabecera */}
         <div className="bg-blue-500 text-white p-3 flex items-center justify-between chat-header">
           <div className="flex items-center">
@@ -352,10 +339,10 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Área de mensajes - Flex-grow para que ocupe todo el espacio disponible */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages bg-white/5 backdrop-blur-sm">
+        {/* Área de mensajes - Fondo blanco simple */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages bg-gray-50">
           {messages.length === 0 ? (
-            <div className="text-center text-white mt-10 bg-blue-900/30 p-6 rounded-xl border border-blue-500/20 shadow-lg">
+            <div className="text-center mt-10 bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-lg">
               <p>¡Bienvenido {userName}! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>
             </div>
           ) : (
