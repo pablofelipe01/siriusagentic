@@ -87,7 +87,7 @@ export function DocumentUploader({ onDocumentSelected, disabled }: DocumentUploa
         type="button"
         onClick={triggerFileInput}
         disabled={disabled || !!fileName}
-        className={`px-3 py-2 rounded-lg text-white ${
+        className={`flex items-center px-3 py-2 rounded-lg text-white chat-toolbar-button ${
           disabled || fileName
             ? 'bg-gray-400 cursor-not-allowed'
             : 'bg-orange-600 hover:bg-orange-700'
@@ -98,30 +98,60 @@ export function DocumentUploader({ onDocumentSelected, disabled }: DocumentUploa
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
+        <span className="hidden sm:inline ml-1">PDF</span>
       </button>
       
-      {/* Información del documento si existe */}
+      {/* Información del documento mejorado para móvil con mejor contraste */}
       {fileName && (
-        <div className="absolute bottom-16 left-3 bg-white p-2 rounded-lg shadow-lg z-50 border border-orange-200">
-          <div className="relative flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="max-w-[150px] truncate text-sm font-medium" title={fileName}>
-              {fileName}
-            </span>
-            <button
-              type="button"
-              onClick={handleClearDocument}
-              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-              title="Eliminar documento"
-              aria-label="Eliminar documento seleccionado"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 file-preview"
+             onClick={() => handleClearDocument()}>
+          <div className="bg-white p-4 rounded-lg shadow-lg max-w-xs w-full relative file-preview-content"
+               onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center mb-2">
+              <div className="bg-red-100 p-2 rounded-lg mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-gray-900 font-bold text-sm">Documento:</h3>
+                <p className="text-gray-900 font-medium text-sm break-words" title={fileName}>
+                  {fileName}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClearDocument();
+                }}
+                className="flex-1 bg-red-600 text-white rounded-lg py-2 px-2 text-sm font-medium"
+                title="Eliminar documento"
+              >
+                Eliminar
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFileName(null);
+                }}
+                className="flex-1 bg-blue-600 text-white rounded-lg py-2 px-2 text-sm font-medium"
+                title="Aceptar"
+              >
+                Aceptar
+              </button>
+            </div>
           </div>
+        </div>
+      )}
+      
+      {/* Indicador de documento seleccionado en la parte inferior */}
+      {fileName && (
+        <div className="absolute bottom-20 left-2 right-2 bg-orange-100 border border-orange-300 p-2 rounded-lg text-xs z-30 text-center">
+          <span className="text-orange-800 font-medium">Documento seleccionado</span>
         </div>
       )}
     </>

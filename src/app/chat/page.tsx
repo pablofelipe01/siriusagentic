@@ -331,8 +331,8 @@ export default function ChatPage() {
 
   // Interfaz de chat
   return (
-    <div className="flex flex-col h-screen">
-      <div className="bg-blue-500 text-white p-3 flex items-center justify-between">
+    <div className="flex flex-col h-screen chat-container">
+      <div className="bg-blue-500 text-white p-3 flex items-center justify-between chat-header">
         <div className="flex items-center">
           <Link href="/" className="mr-3">
             <Home size={24} className="text-white hover:text-blue-100" />
@@ -355,7 +355,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 mt-10">
             <p>¡Bienvenido! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>

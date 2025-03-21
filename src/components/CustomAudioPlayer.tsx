@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
 interface AudioPlayerProps {
-  // src: string     <--- Si solamente tienes un src, ver ejemplo de “doble <source>” más abajo
   srcWebm: string,   // Ejemplo: URL WebM (puede ser blob:)
   srcMp3?: string,   // Ejemplo: URL MP3 fallback (opcional)
   isUser: boolean
@@ -100,7 +99,7 @@ export function CustomAudioPlayer({ srcWebm, srcMp3, isUser }: AudioPlayerProps)
   };
 
   return (
-    <div className="w-full my-1">
+    <div className="w-full my-1 audio-player-container">
       {/* Audio oculto (nuestra UI es custom) */}
       <audio ref={audioRef} preload="metadata">
         {/* Fuente principal: WebM */}
@@ -151,7 +150,18 @@ export function CustomAudioPlayer({ srcWebm, srcMp3, isUser }: AudioPlayerProps)
           )}
         </button>
 
-        <div className="flex-1"></div>
+        <div className="flex-1">
+          {/* Barra de progreso (opcional para móvil) */}
+          <div className="hidden sm:block h-1 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gray-500"
+              style={{
+                width: `${(currentTime / duration) * 100}%`,
+                backgroundColor: isUser ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)',
+              }}
+            ></div>
+          </div>
+        </div>
 
         {/* currentTime / duration */}
         <div className="text-xs opacity-80 min-w-[42px] text-right">

@@ -74,7 +74,7 @@ export function ImageUploader({ onImageSelected, disabled }: ImageUploaderProps)
         type="button"
         onClick={triggerFileInput}
         disabled={disabled || !!previewUrl}
-        className={`px-3 py-2 rounded-lg text-white ${
+        className={`flex items-center px-3 py-2 rounded-lg text-white chat-toolbar-button ${
           disabled || previewUrl
             ? 'bg-gray-400 cursor-not-allowed'
             : 'bg-purple-600 hover:bg-purple-700'
@@ -84,26 +84,43 @@ export function ImageUploader({ onImageSelected, disabled }: ImageUploaderProps)
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
+        <span className="hidden sm:inline ml-1">Imagen</span>
       </button>
       
-      {/* Preview de la imagen si existe */}
+      {/* Preview mejorado para móvil - modal en lugar de posición absoluta */}
       {previewUrl && (
-        <div className="absolute bottom-16 left-3 bg-white p-2 rounded-lg shadow-lg">
-          <div className="relative">
-            <img 
-              src={previewUrl} 
-              alt="Preview" 
-              className="max-h-40 max-w-40 object-contain rounded"
-            />
-            <button
-              type="button"
-              onClick={handleClearImage}
-              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-              title="Eliminar imagen"
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 file-preview" 
+             onClick={() => setPreviewUrl(null)}>
+          <div className="bg-white p-3 rounded-lg shadow-lg max-w-xs w-full relative file-preview-content" 
+               onClick={(e) => e.stopPropagation()}>
+            <div className="relative">
+              <img 
+                src={previewUrl} 
+                alt="Preview" 
+                className="w-full object-contain rounded max-h-40"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClearImage();
+                }}
+                className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                title="Eliminar imagen"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <button 
+              className="w-full mt-2 bg-blue-500 text-white rounded-lg py-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewUrl(null);
+              }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              Aceptar
             </button>
           </div>
         </div>

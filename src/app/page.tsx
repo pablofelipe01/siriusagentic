@@ -194,7 +194,7 @@ export default function ChatPage() {
 
     try {
       // 2. Preparar el body para el POST según el tipo
-      let bodyToSend: any = {
+      const bodyToSend: unknown = {
         body: {
           messages: [
             {

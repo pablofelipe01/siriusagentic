@@ -152,74 +152,96 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   }
 
   return (
-    <div className="border-t p-3 bg-gray-50 relative">
-      {/* Área de depuración - solo visible durante desarrollo */}
+    <div className="border-t p-3 bg-gray-50 relative chat-input-container">
+      {/* File selection indicator - improved positioning for mobile */}
       {(selectedDocument || selectedImage) && (
-        <div className="absolute bottom-24 left-4 right-4 bg-yellow-100 text-xs p-2 rounded-lg z-40 border border-yellow-300 text-center">
+        <div className="absolute bottom-20 left-2 right-2 bg-yellow-100 text-xs p-2 rounded-lg z-40 border border-yellow-300 text-center file-selected-indicator">
           {selectedDocument && (
-            <div className="font-bold">Documento seleccionado: {selectedDocument.name} ({Math.round(selectedDocument.size/1024)} KB)</div>
+            <div className="font-bold">Documento: {selectedDocument.name.length > 20 ? `${selectedDocument.name.substring(0, 20)}...` : selectedDocument.name}</div>
           )}
           {selectedImage && (
-            <div className="font-bold">Imagen seleccionada: {selectedImage.name} ({Math.round(selectedImage.size/1024)} KB)</div>
+            <div className="font-bold">Imagen: {selectedImage.name.length > 20 ? `${selectedImage.name.substring(0, 20)}...` : selectedImage.name}</div>
           )}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex space-x-2">
-        {/* Botón GRABAR/DETENER */}
-        <button
-          type="button"
-          onClick={handleToggleRecord}
-          className={`px-3 py-2 rounded-lg text-white ${
-            isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-          }`}
-          disabled={isLoading}
-        >
-          {isRecording ? 'Detener' : 'Grabar'}
-        </button>
+      {/* Responsive form layout - stack on mobile, row on desktop */}
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+        {/* Control buttons in a row that wraps on narrow screens */}
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto chat-toolbar">
+          {/* Botón GRABAR/DETENER */}
+          <button
+            type="button"
+            onClick={handleToggleRecord}
+            className={`flex items-center justify-center px-3 py-2 rounded-lg text-white chat-toolbar-button ${
+              isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+            }`}
+            disabled={isLoading}
+          >
+            <span className="flex items-center">
+              {isRecording ? 
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <rect x="6" y="6" width="12" height="12" fill="currentColor" />
+                </svg> : 
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="12" cy="12" r="6" fill="currentColor" />
+                </svg>
+              }
+              <span className="hidden sm:inline">{isRecording ? 'Detener' : 'Grabar'}</span>
+            </span>
+          </button>
 
-        {/* Componente de subida de imágenes */}
-        <ImageUploader 
-          onImageSelected={handleImageSelected}
-          disabled={isLoading || isRecording || !!selectedDocument}
-        />
+          {/* Componente de subida de imágenes */}
+          <ImageUploader 
+            onImageSelected={handleImageSelected}
+            disabled={isLoading || isRecording || !!selectedDocument}
+          />
 
-        {/* Componente de subida de documentos */}
-        <DocumentUploader 
-          onDocumentSelected={handleDocumentSelected}
-          disabled={isLoading || isRecording || !!selectedImage}
-        />
+          {/* Componente de subida de documentos */}
+          <DocumentUploader 
+            onDocumentSelected={handleDocumentSelected}
+            disabled={isLoading || isRecording || !!selectedImage}
+          />
+        </div>
 
-        {/* Input de texto */}
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 border rounded-lg p-2 text-gray-800 bg-white"
-          placeholder={
-            isRecording 
-              ? 'Grabando audio...'
-              : selectedImage
-                ? 'Añade un comentario a tu imagen...'
-                : selectedDocument
-                  ? 'Añade un comentario a tu documento...'
-                  : 'Escribe un mensaje, graba audio o sube un archivo...'
-          }
-          disabled={isLoading || isRecording}
-        />
+        {/* Text input and send button */}
+        <div className="flex w-full gap-2 mt-2 sm:mt-0">
+          {/* Input de texto */}
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="flex-1 border rounded-lg p-2 text-gray-800 bg-white"
+            placeholder={
+              isRecording 
+                ? 'Grabando audio...'
+                : selectedImage
+                  ? 'Comentario...'
+                  : selectedDocument
+                    ? 'Comentario...'
+                    : 'Escribe un mensaje...'
+            }
+            disabled={isLoading || isRecording}
+          />
 
-        {/* Botón ENVIAR */}
-        <button
-          type="submit"
-          className={`px-4 py-2 rounded-lg text-white ${
-            isLoading
-              ? 'bg-blue-300 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Enviando...' : 'Enviar'}
-        </button>
+          {/* Botón ENVIAR */}
+          <button
+            type="submit"
+            className={`px-4 py-2 rounded-lg text-white ${
+              isLoading
+                ? 'bg-blue-300 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <span className="loading-indicator mr-2"></span>
+                <span className="hidden sm:inline">Enviando...</span>
+              </span>
+            ) : 'Enviar'}
+          </button>
+        </div>
       </form>
     </div>
   )
