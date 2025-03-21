@@ -249,3 +249,50 @@ body {
   height: 100%;
   transition: width 0.1s linear;
 }
+
+/* Añade estos estilos a tu archivo globals.css o crea un archivo de estilos específico para el chat */
+
+/* Estilos para el contenedor del chat con imagen de fondo */
+.chat-container {
+  background-color: rgba(11, 15, 30, 0.8);
+}
+
+/* Estilos para los mensajes con fondo */
+.user-message {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.bot-message {
+  background-color: rgba(30, 41, 59, 0.75) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para el input de chat */
+.chat-input-container {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Ajustes para que el texto sea legible con el fondo */
+.chat-messages {
+  scrollbar-color: rgba(59, 130, 246, 0.5) rgba(30, 41, 59, 0.4);
+}
+
+/* Estilos para el mensaje de bienvenida */
+.welcome-message {
+  background-color: rgba(30, 58, 138, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 2rem auto;
+  text-align: center;
+}

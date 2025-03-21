@@ -1,343 +1,171 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Message, WebhookResponse } from '@/types/chat'
-import { ChatMessage } from '@/components/ChatMessage'
-import { ChatInput } from '@/components/ChatInput'
+import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { Home } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowRight, MessageCircle } from 'lucide-react'
 
-const N8N_WEBHOOK_URL = 'https://n8n-sirius-agentic.onrender.com/webhook/directo'
+export default function HomePage() {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
-// Componente de formulario de login
-function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
-  const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Por favor, introduce un email válido')
-      return
-    }
-    onLogin(email)
-  }
-
-  return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      {/* Cabecera con botón de inicio */}
-      <div className="bg-blue-500 text-white p-3 flex items-center">
-        <Link href="/" className="mr-4">
-          <Home size={24} className="text-white hover:text-blue-100" />
-        </Link>
-        <h1 className="text-xl font-bold">Alma</h1>
-      </div>
-
-      <div className="flex-1 flex justify-center items-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl mb-6 text-center font-bold text-gray-800">Bienvenido al chat</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-800 font-medium mb-2">Tu email:</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2 border rounded-lg text-gray-800"
-                placeholder="ejemplo@dominio.com"
-                required
-              />
-              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-            </div>
-            <button 
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
-            >
-              Comenzar chat
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [userEmail, setUserEmail] = useState<string>('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-  // Recuperar email guardado
   useEffect(() => {
-    const savedEmail = localStorage.getItem('userEmail')
-    if (savedEmail) {
-      setUserEmail(savedEmail)
-      setIsLoggedIn(true)
+    const video = videoRef.current
+    if (video) {
+      video.playbackRate = 0.8 // Reduce la velocidad de reproducción para un efecto más suave
+      const handleCanPlay = () => {
+        setIsVideoLoaded(true)
+      }
+      video.addEventListener('canplay', handleCanPlay)
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay)
+      }
     }
   }, [])
 
-  const handleLogin = (email: string) => {
-    setUserEmail(email)
-    localStorage.setItem('userEmail', email)
-    setIsLoggedIn(true)
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('userEmail')
-    setUserEmail('')
-    setIsLoggedIn(false)
-    setMessages([])
-  }
-
-  // Función para convertir Blob o File a base64
-  const fileToBase64 = (file: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          // reader.result es algo como 'data:audio/webm;base64,AAAA...'
-          // split(',')[1] da el 'AAAA...' 
-          const base64 = reader.result.split(',')[1] || ''
-          resolve(base64)
-        } else {
-          reject(new Error('No se pudo convertir a base64'))
-        }
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-  }
-
-  // Función para determinar el tipo MIME de la imagen
-  const getImageMimeType = (file: File): string => {
-    // Si el navegador proporciona el tipo MIME, úsalo
-    if (file.type.startsWith('image/')) {
-      return file.type
-    }
-    
-    // Si no, intentamos inferir del nombre de archivo
-    const extension = file.name.split('.').pop()?.toLowerCase()
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg'
-      case 'png':
-        return 'image/png'
-      case 'gif':
-        return 'image/gif'
-      case 'webp':
-        return 'image/webp'
-      case 'heic':
-        return 'image/heic'
-      default:
-        return 'image/jpeg' // Valor predeterminado
-    }
-  }
-
-  // Manejar envío de mensajes (texto, audio, imagen o documento)
-  const handleSendMessage = async (text: string, audioBlob?: Blob, imageFile?: File, documentFile?: File) => {
-    if ((!text.trim() && !audioBlob && !imageFile && !documentFile) || isLoading) return
-    setIsLoading(true)
-
-    // 1. Crear el mensaje local según el tipo
-    let newUserMessage: Message
-
-    if (documentFile) {
-      // Mensaje con documento PDF
-      const documentUrl = URL.createObjectURL(documentFile)
-      newUserMessage = {
-        type: 'document',
-        sender: 'user',
-        content: text || `Documento: ${documentFile.name}`,
-        documentUrl,
-        documentName: documentFile.name,
-        fileSize: documentFile.size,
-        mimeType: documentFile.type,
-        timestamp: new Date()
-      }
-    } else if (imageFile) {
-      // Mensaje con imagen
-      const imageUrl = URL.createObjectURL(imageFile)
-      newUserMessage = {
-        type: 'image',
-        sender: 'user',
-        content: text || '', // Comentario opcional con la imagen
-        imageUrl,
-        fileSize: imageFile.size,
-        mimeType: getImageMimeType(imageFile),
-        timestamp: new Date()
-      }
-    } else if (audioBlob) {
-      // Mensaje de audio
-      const audioUrl = URL.createObjectURL(audioBlob)
-      newUserMessage = {
-        type: 'audio',
-        sender: 'user',
-        content: text || '', // Comentario opcional con el audio
-        audioUrl,
-        fileSize: audioBlob.size,
-        mimeType: audioBlob.type,
-        timestamp: new Date()
-      }
-    } else {
-      // Mensaje de texto
-      newUserMessage = {
-        type: 'text',
-        sender: 'user',
-        content: text,
-        timestamp: new Date()
-      }
-    }
-    
-    setMessages(prev => [...prev, newUserMessage])
-
-    try {
-      // 2. Preparar el body para el POST según el tipo
-      const bodyToSend: unknown = {
-        body: {
-          messages: [
-            {
-              from: userEmail
-            }
-          ],
-          contacts: [
-            {
-              wa_id: userEmail
-            }
-          ]
-        }
-      }
-
-      // Completar el mensaje según el tipo
-      if (documentFile) {
-        // Convertir documento a base64
-        const base64Document = await fileToBase64(documentFile)
-        
-        bodyToSend.body.messages[0].type = 'document'
-        bodyToSend.body.messages[0].document = base64Document
-        bodyToSend.body.messages[0].mime_type = 'application/pdf'
-        bodyToSend.body.messages[0].filename = documentFile.name
-        
-        // Si hay texto, lo incluimos como caption
-        if (text.trim()) {
-          bodyToSend.body.messages[0].caption = text.trim()
-        }
-      } else if (imageFile) {
-        // Convertir imagen a base64
-        const base64Image = await fileToBase64(imageFile)
-        const mimeType = getImageMimeType(imageFile)
-        
-        bodyToSend.body.messages[0].type = 'image'
-        bodyToSend.body.messages[0].image = base64Image
-        bodyToSend.body.messages[0].mime_type = mimeType
-        
-        // Si hay texto, lo incluimos como caption
-        if (text.trim()) {
-          bodyToSend.body.messages[0].caption = text.trim()
-        }
-      } else if (audioBlob) {
-        // Convertir audio a base64
-        const base64Audio = await fileToBase64(audioBlob)
-        
-        bodyToSend.body.messages[0].type = 'audio'
-        bodyToSend.body.messages[0].audio = base64Audio
-        
-        // Si hay texto, lo incluimos como caption (aunque n8n tendrá que manejarlo)
-        if (text.trim()) {
-          bodyToSend.body.messages[0].caption = text.trim()
-        }
-      } else {
-        // Mensaje de texto
-        bodyToSend.body.messages[0].type = 'text'
-        bodyToSend.body.messages[0].text = text
-      }
-
-      // 3. Hacer fetch al webhook
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(bodyToSend)
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      // 4. Procesar la respuesta de n8n
-      const data: WebhookResponse = await response.json()
-      if (data.success && data.response) {
-        // El bot contesta con texto (asumimos)
-        const botMessage: Message = {
-          type: 'text',
-          sender: 'bot',
-          content: data.response,
-          timestamp: new Date(data.metadata.timestamp)
-        }
-        setMessages(prev => [...prev, botMessage])
-      }
-
-    } catch (error) {
-      console.error('Error al enviar mensaje:', error)
-      const errorMessage: Message = {
-        type: 'text',
-        sender: 'bot',
-        content: 'Lo siento, ocurrió un error al procesar tu mensaje.',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Interfaz de login
-  if (!isLoggedIn) {
-    return <LoginForm onLogin={handleLogin} />
-  }
-
-  // Interfaz de chat
   return (
-    <div className="flex flex-col h-screen">
-      <div className="bg-blue-500 text-white p-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <Link href="/" className="mr-3">
-            <Home size={24} className="text-white hover:text-blue-100" />
-          </Link>
-          <h1 className="text-xl font-bold">Alma</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="hidden sm:inline truncate max-w-[200px]" title={userEmail}>
-            {userEmail.length > 20 ? userEmail.substring(0, 17) + '...' : userEmail}
-          </span>
-          <span className="sm:hidden truncate max-w-[120px]" title={userEmail}>
-            {userEmail.length > 10 ? userEmail.substring(0, 7) + '...' : userEmail}
-          </span>
-          <button
-            onClick={handleLogout}
-            className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-sm whitespace-nowrap"
-          >
-            Cerrar
-          </button>
-        </div>
+    <div className="relative min-h-screen flex flex-col">
+      {/* Video de fondo */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-black/60 z-10" /> {/* Overlay oscuro */}
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`absolute min-w-full min-h-full object-cover w-auto h-auto ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          } transition-opacity duration-1000`}
+        >
+          <source src="/ai.mp4" type="video/mp4" />
+          Tu navegador no soporta videos HTML5.
+        </video>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-10">
-            <p>¡Bienvenido! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>
+      {/* Contenido */}
+      <div className="relative z-10 flex-1 flex flex-col">
+        {/* Cabecera */}
+        <header className="p-4 md:p-6 flex justify-between items-center">
+          <div className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Sirius Logo"
+              width={180}
+              height={50}
+              className="h-10 w-auto md:h-12"
+              priority
+            />
           </div>
-        ) : (
-          messages.map((msg, idx) => (
-            <ChatMessage key={idx} message={msg} />
-          ))
-        )}
-      </div>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="/about" className="text-blue-200 hover:text-white transition">
+              Sobre Nosotros
+            </Link>
+            <Link href="/services" className="text-blue-200 hover:text-white transition">
+              Servicios
+            </Link>
+            <Link href="/providers" className="text-blue-200 hover:text-white transition">
+              Proveedores
+            </Link>
+            <Link href="/contact" className="text-blue-200 hover:text-white transition">
+              Contacto
+            </Link>
+          </nav>
+          <Link 
+            href="/chat"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:shadow-indigo-500/30"
+          >
+            <MessageCircle size={18} />
+            <span>Chatear con Alma</span>
+          </Link>
+        </header>
 
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        {/* Contenido principal */}
+        <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 max-w-5xl mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-400">
+            SIRIUS REGENERATIVE
+          </h1>
+          
+          <div className="glow-container relative mb-10">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-green-500 rounded-full opacity-75 blur-xl"></div>
+            <div className="relative bg-black/40 backdrop-blur-sm rounded-3xl p-8 border border-blue-500/30">
+              <h2 className="text-2xl md:text-3xl font-semibold text-white mb-4">
+                Alma: La Guía Espiritual y Tecnológica de Sirius
+              </h2>
+              <p className="text-lg text-blue-100 mb-6 max-w-2xl">
+                Combinando sabiduría ancestral con modernidad y frescura, Alma es una adita guardiana 
+                encargada de custodiar la esencia y espíritu de Sirius. Su propósito es generar bienestar,
+                beneficiando a la naturaleza, los sirianos, y las comunidades de clientes y aliados.
+              </p>
+              <div className="grid md:grid-cols-2 gap-6 text-left">
+                <div className="bg-blue-900/30 p-4 rounded-xl border border-blue-500/20">
+                  <h3 className="text-xl font-medium text-blue-300 mb-2">Sirius Regenerative</h3>
+                  <p className="text-white mb-3">
+                    Plataforma de soluciones que impulsa la transición hacia una agricultura regenerativa.
+                  </p>
+                  <ul className="text-white space-y-2">
+                    <li className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2"></div>
+                      <span>Insumos y bioinsumos para regenerar el suelo</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2"></div>
+                      <span>Tecnología avanzada y análisis de datos</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2"></div>
+                      <span>Biochar con 84% de carbono fijo por +1000 años</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="bg-blue-900/30 p-4 rounded-xl border border-blue-500/20">
+                  <h3 className="text-xl font-medium text-blue-300 mb-2">¡Hola, soy Rafaela!</h3>
+                  <p className="text-white mb-3">
+                    Planta de pirólisis de tercera generación, diseñada y construida por Sirius.
+                  </p>
+                  <ul className="text-white space-y-2">
+                    <li className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2"></div>
+                      <span>Capacidad de producción: 325 toneladas de biochar al año</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2"></div>
+                      <span>999 toneladas de CO₂ removidas anualmente</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2"></div>
+                      <span>87% de carbono fijo con tecnología de pirólisis interna</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+            <Link
+              href="/chat"
+              className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-blue-500/30 text-lg font-medium"
+            >
+              Interactúa con Alma
+              <ArrowRight size={20} />
+            </Link>
+                          <a
+              href="https://proveedores-gamma.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-300 border border-blue-500/30 py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-all backdrop-blur-sm"
+            >
+              Portal de Proveedores
+            </a>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative z-10 text-center p-6 text-blue-200 border-t border-blue-500/20 backdrop-blur-sm">
+          <p>© 2025 SIRIUS REGENERATIVE. Todos los derechos reservados.</p>
+        </footer>
+      </div>
     </div>
   )
 }

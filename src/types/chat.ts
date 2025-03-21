@@ -25,7 +25,7 @@ export interface WebhookResponse {
   metadata: {
     timestamp: string
     sessionId: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 
@@ -59,9 +59,9 @@ export interface AudioPlayerProps {
   isUser: boolean
 }
 
-// Props para el componente LoginForm
+// Props para el componente LoginForm (actualizado)
 export interface LoginFormProps {
-  onLogin: (email: string) => void
+  onLogin: (email: string, name: string, photoUrl: string) => void
 }
 
 // Estructura para el body que se envía al webhook
@@ -82,4 +82,11 @@ export interface WebhookRequestBody {
       wa_id: string
     }]
   }
+}
+
+// Datos del usuario
+export interface UserData {
+  email: string
+  name: string
+  photoUrl: string
 }

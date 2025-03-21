@@ -4,88 +4,56 @@ import { useState, useEffect } from 'react'
 import { Message, WebhookResponse } from '@/types/chat'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
+import { LoginForm } from '@/components/LoginForm'
 import Link from 'next/link'
-import { Home } from 'lucide-react'
+import Image from 'next/image'
+import { Home, User } from 'lucide-react'
 
 const N8N_WEBHOOK_URL = 'https://n8n-sirius-agentic.onrender.com/webhook/directo'
-
-// Componente de formulario de login
-function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
-  const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Por favor, introduce un email válido')
-      return
-    }
-    onLogin(email)
-  }
-
-  return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      {/* Cabecera con botón de inicio */}
-      <div className="bg-blue-500 text-white p-3 flex items-center">
-        <Link href="/" className="mr-4">
-          <Home size={24} className="text-white hover:text-blue-100" />
-        </Link>
-        <h1 className="text-xl font-bold">Alma</h1>
-      </div>
-
-      <div className="flex-1 flex justify-center items-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl mb-6 text-center font-bold text-gray-800">Bienvenido al chat</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-800 font-medium mb-2">Tu email:</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2 border rounded-lg text-gray-800"
-                placeholder="ejemplo@dominio.com"
-                required
-              />
-              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-            </div>
-            <button 
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
-            >
-              Comenzar chat
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [userEmail, setUserEmail] = useState<string>('')
+  const [userName, setUserName] = useState<string>('')
+  const [userPhoto, setUserPhoto] = useState<string>('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  // Recuperar email guardado
+  // Recuperar datos guardados
   useEffect(() => {
     const savedEmail = localStorage.getItem('userEmail')
+    const savedName = localStorage.getItem('userName')
+    const savedPhoto = localStorage.getItem('userPhoto')
+    
     if (savedEmail) {
       setUserEmail(savedEmail)
+      setUserName(savedName || '')
+      setUserPhoto(savedPhoto || '')
       setIsLoggedIn(true)
     }
   }, [])
 
-  const handleLogin = (email: string) => {
+  const handleLogin = (email: string, name: string, photoUrl: string) => {
     setUserEmail(email)
+    setUserName(name)
+    setUserPhoto(photoUrl)
+    
+    // Guardar en localStorage
     localStorage.setItem('userEmail', email)
+    localStorage.setItem('userName', name)
+    localStorage.setItem('userPhoto', photoUrl)
+    
     setIsLoggedIn(true)
   }
 
   const handleLogout = () => {
     localStorage.removeItem('userEmail')
+    localStorage.removeItem('userName')
+    localStorage.removeItem('userPhoto')
+    
     setUserEmail('')
+    setUserName('')
+    setUserPhoto('')
     setIsLoggedIn(false)
     setMessages([])
   }
@@ -204,7 +172,6 @@ export default function ChatPage() {
 
     try {
       // 2. Preparar el body para el POST según el tipo
-      // Fixed: Changed 'let' to 'const' and 'any' to a specific interface
       interface WebhookBody {
         body: {
           messages: Array<{
@@ -329,45 +296,75 @@ export default function ChatPage() {
     return <LoginForm onLogin={handleLogin} />
   }
 
-  // Interfaz de chat
+  // Interfaz de chat con imagen de fondo
   return (
-    <div className="flex flex-col h-screen chat-container">
-      <div className="bg-blue-500 text-white p-3 flex items-center justify-between chat-header">
-        <div className="flex items-center">
-          <Link href="/" className="mr-3">
-            <Home size={24} className="text-white hover:text-blue-100" />
-          </Link>
-          <h1 className="text-xl font-bold">Alma</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="hidden sm:inline truncate max-w-[200px]" title={userEmail}>
-            {userEmail.length > 20 ? userEmail.substring(0, 17) + '...' : userEmail}
-          </span>
-          <span className="sm:hidden truncate max-w-[120px]" title={userEmail}>
-            {userEmail.length > 10 ? userEmail.substring(0, 7) + '...' : userEmail}
-          </span>
-          <button
-            onClick={handleLogout}
-            className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-sm whitespace-nowrap"
-          >
-            Cerrar
-          </button>
-        </div>
+    <div className="flex flex-col h-screen chat-container relative">
+      {/* Imagen de fondo */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/h6.png"
+          alt="Background"
+          fill
+          priority
+          className="object-cover opacity-09"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/30" />
       </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages">
-        {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-10">
-            <p>¡Bienvenido! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>
+      
+      {/* Contenido del chat */}
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="bg-blue-500 text-white p-3 flex items-center justify-between chat-header">
+          <div className="flex items-center">
+            <Link href="/" className="mr-3">
+              <Home size={24} className="text-white hover:text-blue-100" />
+            </Link>
+            <h1 className="text-xl font-bold">Alma</h1>
           </div>
-        ) : (
-          messages.map((msg, idx) => (
-            <ChatMessage key={idx} message={msg} />
-          ))
-        )}
-      </div>
+          <div className="flex items-center gap-2">
+            {/* Foto del usuario */}
+            {userPhoto ? (
+              <img 
+                src={userPhoto} 
+                alt={userName} 
+                className="w-8 h-8 rounded-full object-cover border border-white"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                <User size={16} className="text-white" />
+              </div>
+            )}
+            
+            {/* Nombre del usuario */}
+            <span className="hidden sm:inline truncate max-w-[200px]" title={userName || userEmail}>
+              {userName || (userEmail.length > 20 ? userEmail.substring(0, 17) + '...' : userEmail)}
+            </span>
+            <span className="sm:hidden truncate max-w-[120px]" title={userName || userEmail}>
+              {userName || (userEmail.length > 10 ? userEmail.substring(0, 7) + '...' : userEmail)}
+            </span>
+            
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-sm whitespace-nowrap"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
 
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages bg-white/5 backdrop-blur-sm">
+          {messages.length === 0 ? (
+            <div className="text-center text-white mt-10 bg-blue-900/30 p-6 rounded-xl border border-blue-500/20 shadow-lg">
+              <p>¡Bienvenido {userName}! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>
+            </div>
+          ) : (
+            messages.map((msg, idx) => (
+              <ChatMessage key={idx} message={msg} />
+            ))
+          )}
+        </div>
+
+        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+      </div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useState, FormEvent, useRef, useEffect } from 'react'
 import { ImageUploader } from './ImageUploader'
 import { DocumentUploader } from './DocumentUploader'
+import { Mic, Square } from 'lucide-react'
 
 interface ChatInputProps {
   onSendMessage: (text: string, audioBlob?: Blob, imageFile?: File, documentFile?: File) => void
@@ -181,7 +182,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
         {/* Control buttons in a row that wraps on narrow screens */}
         <div className="flex flex-wrap gap-2 w-full sm:w-auto chat-toolbar">
-          {/* Botón GRABAR/DETENER */}
+          {/* Botón GRABAR/DETENER con iconos de Lucide */}
           <button
             type="button"
             onClick={handleToggleRecord}
@@ -192,12 +193,8 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
           >
             <span className="flex items-center">
               {isRecording ? 
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <rect x="6" y="6" width="12" height="12" fill="currentColor" />
-                </svg> : 
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <circle cx="12" cy="12" r="6" fill="currentColor" />
-                </svg>
+                <Square size={18} className="mr-1" /> : 
+                <Mic size={18} className="mr-1" />
               }
               <span className="hidden sm:inline">{isRecording ? 'Detener' : 'Grabar'}</span>
             </span>
