@@ -7,7 +7,7 @@ import { ChatInput } from '@/components/ChatInput'
 import Link from 'next/link'
 import { Home } from 'lucide-react'
 
-const N8N_WEBHOOK_URL = 'https://n8n-sirius-agentic.onrender.com/webhook-test/directo'
+const N8N_WEBHOOK_URL = 'https://n8n-sirius-agentic.onrender.com/webhook/directo'
 
 // Componente de formulario de login
 function LoginForm({ onLogin }: { onLogin: (email: string) => void }) {
