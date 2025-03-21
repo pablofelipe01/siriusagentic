@@ -165,10 +165,10 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   }
 
   return (
-    <div className="border-t p-3 bg-gray-50 chat-input-container w-full fixed bottom-0 left-0 right-0">
-      {/* File selection indicator - improved positioning for mobile */}
+    <div className="p-3 w-full">
+      {/* File selection indicator */}
       {(selectedDocument || selectedImage) && (
-        <div className="absolute bottom-20 left-2 right-2 bg-yellow-100 text-xs p-2 rounded-lg z-40 border border-yellow-300 text-center file-selected-indicator">
+        <div className="bg-blue-800 text-xs p-2 mb-2 rounded-lg border border-yellow-300 text-center">
           {selectedDocument && (
             <div className="font-bold">Documento: {selectedDocument.name.length > 20 ? `${selectedDocument.name.substring(0, 20)}...` : selectedDocument.name}</div>
           )}
@@ -181,12 +181,12 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       {/* Responsive form layout - stack on mobile, row on desktop */}
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
         {/* Control buttons in a row that wraps on narrow screens */}
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto chat-toolbar">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {/* Botón GRABAR/DETENER con iconos de Lucide */}
           <button
             type="button"
             onClick={handleToggleRecord}
-            className={`flex items-center justify-center px-3 py-2 rounded-lg text-white chat-toolbar-button ${
+            className={`flex items-center justify-center px-3 py-2 rounded-lg text-white ${
               isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
             }`}
             disabled={isLoading}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Message, WebhookResponse } from '@/types/chat'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
@@ -18,6 +18,7 @@ export default function ChatPage() {
   const [userName, setUserName] = useState<string>('')
   const [userPhoto, setUserPhoto] = useState<string>('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Recuperar datos guardados
   useEffect(() => {
@@ -32,6 +33,13 @@ export default function ChatPage() {
       setIsLoggedIn(true)
     }
   }, [])
+
+  // Scroll al final cuando llegan nuevos mensajes
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages])
 
   const handleLogin = (email: string, name: string, photoUrl: string) => {
     setUserEmail(email)
@@ -296,11 +304,11 @@ export default function ChatPage() {
     return <LoginForm onLogin={handleLogin} />
   }
 
-  // Interfaz de chat con imagen de fondo
+  // Interfaz de chat con imagen de fondo - Diseño de altura fija con scroll
   return (
-    <div className="fixed inset-0 flex flex-col chat-container">
+    <div className="h-screen flex flex-col">
       {/* Imagen de fondo */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0">
         <Image
           src="/h6.png"
           alt="Background"
@@ -308,13 +316,13 @@ export default function ChatPage() {
           priority
           className="object-cover opacity-09"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/30" />
+        <div className="fixed inset-0 bg-gradient-to-b from-black/20 to-black/30" />
       </div>
       
       {/* Contenido del chat */}
-      <div className="relative z-10 flex flex-col h-full w-full overflow-hidden">
-        {/* Cabecera */}
-        <div className="bg-blue-500 text-white p-3 flex items-center justify-between chat-header">
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Cabecera - Altura fija */}
+        <div className="bg-blue-500 text-white p-3 flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="mr-3">
               <Home size={24} className="text-white hover:text-blue-100" />
@@ -352,21 +360,25 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Área de mensajes - Flex-grow para que ocupe todo el espacio disponible */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages bg-white/5 backdrop-blur-sm">
+        {/* Área de mensajes - Calculando el espacio disponible */}
+        <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-white/5 backdrop-blur-sm">
           {messages.length === 0 ? (
             <div className="text-center text-white mt-10 bg-blue-900/30 p-6 rounded-xl border border-blue-500/20 shadow-lg">
               <p>¡Bienvenido {userName}! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>
             </div>
           ) : (
-            messages.map((msg, idx) => (
-              <ChatMessage key={idx} message={msg} />
-            ))
+            <>
+              {messages.map((msg, idx) => (
+                <ChatMessage key={idx} message={msg} />
+              ))}
+              {/* Elemento invisible al final para scroll automático */}
+              <div ref={messagesEndRef} />
+            </>
           )}
         </div>
 
-        {/* Área de entrada - pegada al fondo */}
-        <div className="w-full">
+        {/* Área de entrada - Altura fija separada del scroll */}
+        <div className="bg-gray-50 border-t">
           <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
         </div>
       </div>
