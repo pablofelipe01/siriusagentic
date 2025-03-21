@@ -14,19 +14,59 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Convertir archivo a base64
-  const fileToBase64 = (file: File): Promise<string> => {
+  // Redimensionar imagen y convertir a base64
+  const resizeAndConvertToBase64 = (file: File, maxWidth = 500, maxHeight = 500): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result)
+      // Crear un objeto URL para la imagen
+      const objectUrl = URL.createObjectURL(file)
+      
+      // Crear un elemento de imagen para cargar el archivo
+      const img = new Image()
+      img.onload = () => {
+        // Liberar el objeto URL una vez cargada la imagen
+        URL.revokeObjectURL(objectUrl)
+        
+        // Calcular las nuevas dimensiones manteniendo la proporción
+        let width = img.width
+        let height = img.height
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width
+            width = maxWidth
+          }
         } else {
-          reject(new Error('No se pudo convertir a base64'))
+          if (height > maxHeight) {
+            width *= maxHeight / height
+            height = maxHeight
+          }
         }
+        
+        // Crear un canvas con las nuevas dimensiones
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        
+        // Dibujar la imagen redimensionada en el canvas
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('No se pudo obtener el contexto del canvas'))
+          return
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height)
+        
+        // Convertir el canvas a base64 (con calidad reducida para JPEG)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
+        resolve(dataUrl)
       }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl)
+        reject(new Error('Error al cargar la imagen'))
+      }
+      
+      img.src = objectUrl
     })
   }
 
@@ -34,24 +74,24 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       
-      // Limitar el tamaño del archivo (por ejemplo, a 1MB)
-      if (file.size > 1024 * 1024) {
-        setError('La imagen es demasiado grande. El tamaño máximo es 1MB.')
-        return
-      }
-      
       try {
         setIsLoading(true)
+        setError('')
         
-        // Crear URL para preview
+        // Crear URL para preview (usamos la original para mejor calidad de preview)
         const previewUrl = URL.createObjectURL(file)
         setPhotoPreview(previewUrl)
         
-        // Convertir a base64 para almacenamiento persistente
-        const base64 = await fileToBase64(file)
+        // Redimensionar y convertir a base64
+        const base64 = await resizeAndConvertToBase64(file)
         setPhotoBase64(base64)
         
-        setError('')
+        // Para depuración: mostrar el tamaño de la imagen resultante
+        const base64Size = Math.round((base64.length * 3) / 4) - 
+                          (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0)
+        console.log(`Tamaño de imagen original: ${file.size / 1024} KB`)
+        console.log(`Tamaño después de redimensionar: ${base64Size / 1024} KB`)
+        
       } catch (err) {
         console.error('Error al procesar la imagen:', err)
         setError('Error al procesar la imagen. Inténtalo de nuevo.')
@@ -145,7 +185,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   accept="image/*"
                   disabled={isLoading}
                 />
-                <p className="text-xs text-gray-500 mt-1">Tamaño máximo: 1MB</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isLoading ? 'Procesando imagen...' : 'Se optimizará automáticamente'}
+                </p>
               </div>
             </div>
           </div>
