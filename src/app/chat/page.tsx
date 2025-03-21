@@ -298,7 +298,7 @@ export default function ChatPage() {
 
   // Interfaz de chat con imagen de fondo
   return (
-    <div className="flex flex-col h-screen chat-container relative">
+    <div className="fixed inset-0 flex flex-col chat-container">
       {/* Imagen de fondo */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -312,7 +312,8 @@ export default function ChatPage() {
       </div>
       
       {/* Contenido del chat */}
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-full w-full overflow-hidden">
+        {/* Cabecera */}
         <div className="bg-blue-500 text-white p-3 flex items-center justify-between chat-header">
           <div className="flex items-center">
             <Link href="/" className="mr-3">
@@ -351,6 +352,7 @@ export default function ChatPage() {
           </div>
         </div>
 
+        {/* Área de mensajes - Flex-grow para que ocupe todo el espacio disponible */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-messages bg-white/5 backdrop-blur-sm">
           {messages.length === 0 ? (
             <div className="text-center text-white mt-10 bg-blue-900/30 p-6 rounded-xl border border-blue-500/20 shadow-lg">
@@ -363,7 +365,10 @@ export default function ChatPage() {
           )}
         </div>
 
-        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        {/* Área de entrada - pegada al fondo */}
+        <div className="w-full">
+          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        </div>
       </div>
     </div>
   )

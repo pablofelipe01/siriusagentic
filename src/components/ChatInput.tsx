@@ -165,7 +165,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   }
 
   return (
-    <div className="border-t p-3 bg-gray-50 relative chat-input-container">
+    <div className="border-t p-3 bg-gray-50 chat-input-container w-full fixed bottom-0 left-0 right-0">
       {/* File selection indicator - improved positioning for mobile */}
       {(selectedDocument || selectedImage) && (
         <div className="absolute bottom-20 left-2 right-2 bg-yellow-100 text-xs p-2 rounded-lg z-40 border border-yellow-300 text-center file-selected-indicator">
