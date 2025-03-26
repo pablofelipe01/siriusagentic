@@ -82,23 +82,24 @@ export function DocumentUploader({ onDocumentSelected, disabled }: DocumentUploa
         disabled={disabled}
       />
       
-      {/* Botón para abrir el selector de archivos */}
+      {/* Botón para abrir el selector de archivos - SIN FONDO y con icono azul */}
       <button
         type="button"
         onClick={triggerFileInput}
         disabled={disabled || !!fileName}
-        className={`flex items-center px-3 py-2 rounded-lg text-white chat-toolbar-button ${
+        className={`flex items-center px-3 py-2 rounded-lg ${
           disabled || fileName
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-orange-600 hover:bg-orange-700'
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:bg-gray-100'
         }`}
         title="Subir PDF"
         aria-label="Subir documento PDF"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        {/* Icono de clip azul */}
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
         </svg>
-        <span className="hidden sm:inline ml-1">PDF</span>
+        <span className="hidden sm:inline ml-1 text-blue-600">PDF</span>
       </button>
       
       {/* Información del documento mejorado para móvil con mejor contraste */}

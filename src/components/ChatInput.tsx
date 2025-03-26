@@ -1,7 +1,7 @@
 import { useState, FormEvent, useRef, useEffect } from 'react'
 import { ImageUploader } from './ImageUploader'
 import { DocumentUploader } from './DocumentUploader'
-import { Mic, Square } from 'lucide-react'
+import { Mic, Square, Send, Loader2 } from 'lucide-react'
 
 interface ChatInputProps {
   onSendMessage: (text: string, audioBlob?: Blob, imageFile?: File, documentFile?: File) => void
@@ -168,7 +168,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
     <div className="p-3 w-full">
       {/* File selection indicator */}
       {(selectedDocument || selectedImage) && (
-        <div className="bg-blue-800 text-xs p-2 mb-2 rounded-lg border border-yellow-300 text-center">
+        <div className="bg-blue-50 text-blue-800 p-2 mb-2 rounded-lg border border-blue-200 text-center">
           {selectedDocument && (
             <div className="font-bold">Documento: {selectedDocument.name.length > 20 ? `${selectedDocument.name.substring(0, 20)}...` : selectedDocument.name}</div>
           )}
@@ -178,80 +178,96 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         </div>
       )}
 
-      {/* Responsive form layout - stack on mobile, row on desktop */}
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-        {/* Control buttons in a row that wraps on narrow screens */}
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          {/* Botón GRABAR/DETENER con iconos de Lucide */}
-          <button
-            type="button"
-            onClick={handleToggleRecord}
-            className={`flex items-center justify-center px-3 py-2 rounded-lg text-white ${
-              isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-            }`}
-            disabled={isLoading}
-          >
-            <span className="flex items-center">
-              {isRecording ? 
-                <Square size={18} className="mr-1" /> : 
-                <Mic size={18} className="mr-1" />
+      {/* Estilo WhatsApp - Barra de input y botones */}
+      <div className="flex flex-col">
+        {/* Indicador de grabación si está activa */}
+        {isRecording && (
+          <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 flex items-center">
+            <div className="w-3 h-3 rounded-full bg-red-600 animate-pulse mr-2"></div>
+            <span>Grabando audio...</span>
+            <button
+              type="button"
+              onClick={handleToggleRecord}
+              className="ml-auto p-2 bg-red-500 hover:bg-red-600 text-white rounded-full"
+              disabled={isLoading}
+            >
+              <Square size={16} />
+            </button>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="relative">
+          <div className="flex items-center bg-white rounded-full shadow-md overflow-hidden">
+            {/* Botones para adjuntos (izquierda) */}
+            <div className="flex">
+              <div className="px-2">
+                <DocumentUploader 
+                  onDocumentSelected={handleDocumentSelected}
+                  disabled={isLoading || isRecording || !!selectedImage}
+                />
+              </div>
+              
+              <div className="px-2">
+                <ImageUploader 
+                  onImageSelected={handleImageSelected}
+                  disabled={isLoading || isRecording || !!selectedDocument}
+                />
+              </div>
+            </div>
+            
+            {/* Input de texto (centro) con mejor contraste */}
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="flex-1 py-3 px-2 outline-none bg-transparent text-gray-800 placeholder-gray-500"
+              placeholder={
+                isRecording 
+                  ? 'Grabando audio...'
+                  : selectedImage
+                    ? 'Añade un comentario...'
+                    : selectedDocument
+                      ? 'Añade un comentario...'
+                      : 'Escribe un mensaje...'
               }
-              <span className="hidden sm:inline">{isRecording ? 'Detener' : 'Grabar'}</span>
-            </span>
-          </button>
-
-          {/* Componente de subida de imágenes */}
-          <ImageUploader 
-            onImageSelected={handleImageSelected}
-            disabled={isLoading || isRecording || !!selectedDocument}
-          />
-
-          {/* Componente de subida de documentos */}
-          <DocumentUploader 
-            onDocumentSelected={handleDocumentSelected}
-            disabled={isLoading || isRecording || !!selectedImage}
-          />
-        </div>
-
-        {/* Text input and send button */}
-        <div className="flex w-full gap-2 mt-2 sm:mt-0">
-          {/* Input de texto */}
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1 border rounded-lg p-2 text-gray-800 bg-white"
-            placeholder={
-              isRecording 
-                ? 'Grabando audio...'
-                : selectedImage
-                  ? 'Comentario...'
-                  : selectedDocument
-                    ? 'Comentario...'
-                    : 'Escribe un mensaje...'
-            }
-            disabled={isLoading || isRecording}
-          />
-
-          {/* Botón ENVIAR */}
-          <button
-            type="submit"
-            className={`px-4 py-2 rounded-lg text-white ${
-              isLoading
-                ? 'bg-blue-300 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-            }`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                <span className="loading-indicator mr-2"></span>
-                <span className="hidden sm:inline">Enviando...</span>
-              </span>
-            ) : 'Enviar'}
-          </button>
-        </div>
-      </form>
+              disabled={isLoading || isRecording}
+            />
+            
+            {/* Botón de acción contextual (derecha) */}
+            <div className="pr-2">
+              {isLoading ? (
+                <button 
+                  type="button" 
+                  className="p-3 text-blue-500" 
+                  disabled
+                >
+                  <Loader2 size={24} className="animate-spin" />
+                </button>
+              ) : (
+                <>
+                  {(input.trim() || selectedImage || selectedDocument) ? (
+                    <button 
+                      type="submit"
+                      className="p-3 text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      <Send size={24} />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleToggleRecord}
+                      className={`p-3 focus:outline-none ${isRecording ? 'text-red-600' : 'text-blue-600 hover:text-blue-800'}`}
+                      disabled={isLoading}
+                    >
+                      <Mic size={24} />
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
