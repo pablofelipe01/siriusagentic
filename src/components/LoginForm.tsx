@@ -1,9 +1,17 @@
 // components/LoginForm.tsx
-import { useState, FormEvent } from 'react'
-import { User } from 'lucide-react'
+import { useState, FormEvent, useEffect } from 'react'
+import { User, AlertCircle } from 'lucide-react'
 
 interface LoginFormProps {
   onLogin: (email: string, name: string, photoUrl: string) => void
+}
+
+// Define interface for authorized user from Airtable
+interface AuthorizedUser {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
@@ -13,6 +21,37 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [photoBase64, setPhotoBase64] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false)
+  const [authorizedUsers, setAuthorizedUsers] = useState<AuthorizedUser[]>([])
+
+  // Fetch authorized users from Airtable when component mounts
+  useEffect(() => {
+    fetchAuthorizedUsers()
+  }, [])
+
+  // Function to fetch authorized users from Airtable
+  const fetchAuthorizedUsers = async () => {
+    try {
+      const response = await fetch('/api/authorizedUsers')
+      const data = await response.json()
+      
+      if (data.success) {
+        setAuthorizedUsers(data.users)
+      } else {
+        console.error('Error fetching authorized users:', data.error)
+      }
+    } catch (err) {
+      console.error('Error connecting to API:', err)
+    }
+  }
+
+  // Check if a user is authorized by their email
+  const isEmailAuthorized = (emailToCheck: string): boolean => {
+    // Case insensitive comparison
+    return authorizedUsers.some(user => 
+      user.email.toLowerCase() === emailToCheck.toLowerCase()
+    )
+  }
 
   // Redimensionar imagen y convertir a base64
   const resizeAndConvertToBase64 = (file: File, maxWidth = 500, maxHeight = 500): Promise<string> => {
@@ -101,7 +140,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     }
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     
     // Validación básica de email
@@ -115,10 +154,47 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       return
     }
     
-    // Usamos la versión base64 de la imagen para almacenamiento persistente
-    const photoUrl = photoBase64 || ''
+    setIsCheckingAuth(true)
+    setError('')
     
-    onLogin(email, name, photoUrl)
+    try {
+      // First check locally if we already have the list of authorized users
+      if (authorizedUsers.length > 0) {
+        if (!isEmailAuthorized(email)) {
+          setError('Lo sentimos, este correo electrónico no está autorizado para acceder.')
+          setIsCheckingAuth(false)
+          return
+        }
+      } else {
+        // Fallback: check authorization directly with the API
+        const response = await fetch('/api/authorizedUsers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+        
+        const data = await response.json();
+        
+        if (!data.authorized) {
+          setError('Lo sentimos, este correo electrónico no está autorizado para acceder.')
+          setIsCheckingAuth(false)
+          return
+        }
+      }
+      
+      // Si llegamos aquí, el usuario está autorizado
+      // Usamos la versión base64
+      const photoUrl = photoBase64 || ''
+      onLogin(email, name, photoUrl)
+      
+    } catch (err) {
+      console.error('Error al verificar autorización:', err)
+      setError('Error al verificar credenciales. Por favor, inténtalo de nuevo.')
+    } finally {
+      setIsCheckingAuth(false)
+    }
   }
 
   return (
@@ -157,6 +233,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               placeholder="ejemplo@dominio.com"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Solo correos autorizados pueden ingresar
+            </p>
           </div>
           
           <div className="mb-6">
@@ -192,14 +271,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             </div>
           </div>
           
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {error && (
+            <div className="flex items-center p-3 mb-4 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle size={16} className="text-red-500 mr-2" />
+              <p className="text-red-500 text-sm">{error}</p>
+            </div>
+          )}
           
           <button 
             type="submit"
             className="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 rounded-lg"
-            disabled={isLoading}
+            disabled={isLoading || isCheckingAuth}
           >
-            {isLoading ? 'Procesando...' : 'Comenzar chat'}
+            {isLoading ? 'Procesando...' : isCheckingAuth ? 'Verificando...' : 'Comenzar chat'}
           </button>
         </form>
       </div>
