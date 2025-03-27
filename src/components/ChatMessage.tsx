@@ -1,6 +1,6 @@
 import { Message } from '@/types/chat'
 import { CustomAudioPlayer } from './CustomAudioPlayer'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface ChatMessageProps {
   message: Message
@@ -10,6 +10,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.sender === 'user'
   const [isImageExpanded, setIsImageExpanded] = useState(false)
   const [isDocumentExpanded, setIsDocumentExpanded] = useState(false)
+
+  // Reproducir automáticamente el audio del bot (opcional)
+  useEffect(() => {
+    // Si es un mensaje de audio del bot, reproducir automáticamente
+    if (message.type === 'audio' && !isUser && message.audioUrl) {
+      const audio = new Audio(message.audioUrl);
+      
+      // Opcional: puedes comentar estas líneas si prefieres no reproducir automáticamente
+      // audio.play().catch(e => console.log('Error al reproducir audio del bot:', e));
+    }
+  }, [message, isUser]);
 
   // Manejar clic en la imagen para expandir/colapsar
   const handleImageClick = () => {
@@ -42,6 +53,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
               srcWebm={message.audioUrl} 
               isUser={isUser} 
             />
+            {/* Mostrar etiqueta para audio del bot */}
+            {!isUser && (
+              <div className="text-xs mt-1 text-gray-500">Respuesta por voz</div>
+            )}
             {message.content && (
               <p className="mt-2 whitespace-pre-wrap break-words">{message.content}</p>
             )}

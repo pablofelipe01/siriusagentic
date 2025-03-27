@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Message, WebhookResponse } from '@/types/chat'
+import { Message, WebhookResponse, WebhookRequestBody } from '@/types/chat'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
 import { LoginForm } from '@/components/LoginForm'
@@ -180,37 +180,21 @@ export default function ChatPage() {
 
     try {
       // 2. Preparar el body para el POST según el tipo
-      interface WebhookBody {
-        body: {
-          messages: Array<{
-            from: string;
-            type?: string;
-            text?: string;
-            document?: string;
-            image?: string;
-            audio?: string;
-            mime_type?: string;
-            filename?: string;
-            caption?: string;
-          }>;
-          contacts: Array<{
-            wa_id: string;
-          }>;
-        };
-      }
-
-      const bodyToSend: WebhookBody = {
+      const bodyToSend: WebhookRequestBody = {
         body: {
           messages: [
             {
-              from: userEmail
+              from: userEmail,
+              type: 'text',
+              text: ''  // Se llenará según el tipo de mensaje
             }
           ],
           contacts: [
             {
               wa_id: userEmail
             }
-          ]
+          ],
+          request_voice: true  // Solicitar respuesta por voz
         }
       }
 
@@ -275,14 +259,47 @@ export default function ChatPage() {
       // 4. Procesar la respuesta de n8n
       const data: WebhookResponse = await response.json()
       if (data.success && data.response) {
-        // El bot contesta con texto (asumimos)
-        const botMessage: Message = {
-          type: 'text',
-          sender: 'bot',
-          content: data.response,
-          timestamp: new Date(data.metadata.timestamp)
+        let botMessage: Message;
+        
+        // Verificar si la respuesta incluye audio
+        if (data.audio && data.metadata?.has_audio) {
+          // Crear un Blob de audio a partir del base64
+          const byteCharacters = atob(data.audio);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const audioBlob = new Blob([byteArray], { type: data.audio_mime_type || 'audio/mpeg' });
+          
+          // Crear URL para el audio
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          // Crear mensaje con audio
+          botMessage = {
+            type: 'audio',
+            sender: 'bot',
+            content: data.response, // El texto también se incluye
+            audioUrl,
+            fileSize: byteArray.length,
+            mimeType: data.audio_mime_type || 'audio/mpeg',
+            timestamp: new Date(data.metadata.timestamp)
+          };
+          
+          // Opcional: reproducir automáticamente el audio
+          const audio = new Audio(audioUrl);
+          audio.play().catch(e => console.log('Error al reproducir audio:', e));
+        } else {
+          // Mensaje de texto normal (como ya tenías)
+          botMessage = {
+            type: 'text',
+            sender: 'bot',
+            content: data.response,
+            timestamp: new Date(data.metadata.timestamp)
+          };
         }
-        setMessages(prev => [...prev, botMessage])
+        
+        setMessages(prev => [...prev, botMessage]);
       }
 
     } catch (error) {

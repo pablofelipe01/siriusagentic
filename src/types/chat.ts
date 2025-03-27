@@ -22,9 +22,12 @@ export interface Message {
 export interface WebhookResponse {
   success: boolean
   response: string
+  audio?: string  // Audio codificado en base64
+  audio_mime_type?: string  // Tipo MIME del audio (ej: 'audio/mpeg')
   metadata: {
     timestamp: string
     sessionId: string
+    has_audio?: boolean  // Indica si la respuesta incluye audio
     [key: string]: unknown
   }
 }
@@ -81,6 +84,7 @@ export interface WebhookRequestBody {
     contacts: [{
       wa_id: string
     }]
+    request_voice?: boolean  // Opcional: para solicitar respuesta por voz
   }
 }
 
