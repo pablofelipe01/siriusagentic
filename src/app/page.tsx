@@ -93,7 +93,7 @@ export default function HomePage() {
                 Alma: La Guía Espiritual y Tecnológica de Sirius
               </h2>
               <p className="text-lg text-blue-100 mb-6 max-w-2xl">
-                Combinando sabiduría ancestral con modernidad y frescura, Alma es una adita guardiana 
+                Combinando sabiduría ancestral con modernidad y frescura, Alma es una hadita guardiana 
                 encargada de custodiar la esencia y espíritu de Sirius. Su propósito es generar bienestar,
                 beneficiando a la naturaleza, los sirianos, y las comunidades de clientes y aliados.
               </p>
