@@ -50,68 +50,114 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // === SECCIONES REALES SIRIUS ===
   const sections = [
-    { 
-      id: 'alma', 
-      label: 'Alma', 
-      icon: MessageCircle, 
-      description: 'Asistente IA conversacional',
+    {
+      id: 'alma',
+      label: 'Alma',
+      icon: MessageCircle,
+      description: 'Asistente IA conversacional institucional',
       color: 'from-blue-500 to-purple-600',
-      features: ['Conocimiento interno', 'Procesos y políticas', 'Generación de documentos'],
+      features: [
+        'Responde preguntas sobre procesos y políticas',
+        'Guía en el uso de las aplicaciones Sirius',
+        'Generación de documentos y reportes',
+        'Acceso a conocimiento interno actualizado'
+      ],
       link: '/chat'
     },
-    { 
-      id: 'documentacion', 
-      label: 'Documentación', 
-      icon: Book, 
-      description: 'Manual técnico y administrativo',
+    {
+      id: 'documentacion',
+      label: 'Documentación',
+      icon: Book,
+      description: 'Manual técnico y administrativo de Sirius',
       color: 'from-green-500 to-teal-600',
-      features: ['APIs de integración', 'Flujos n8n', 'Guías completas'],
+      features: [
+        'APIs de integración',
+        'Flujos n8n',
+        'Guías técnicas',
+        'Tutoriales y videos',
+        'Integraciones y conectores',
+        'Documentación administrativa'
+      ],
       link: '/documentacion'
     },
-    { 
-      id: 'smartbots', 
-      label: 'SmartBots', 
-      icon: Bot, 
-      description: 'Automatización inteligente',
+    {
+      id: 'smartbots',
+      label: 'SmartBots',
+      icon: Bot,
+      description: 'Automatización de procesos críticos con bots inteligentes',
       color: 'from-orange-500 to-red-600',
-      features: ['Permisos automatizados', 'Gestión de biochar', 'Firmas digitales'],
+      features: [
+        'Permisos laborales (Telegram)',
+        'Gestión de biochar (Telegram)',
+        'Registro de producción (Telegram)',
+        'Flujos automatizados de caja y proveedores',
+        'Bots para laboratorio y pirolisis',
+        'Alertas y notificaciones automáticas'
+      ],
       link: '/smartbots'
     },
-    { 
-      id: 'admin-apps', 
-      label: 'Administrativas', 
-      icon: Briefcase, 
-      description: 'Herramientas de gestión',
+    {
+      id: 'admin-apps',
+      label: 'Administrativas',
+      icon: Briefcase,
+      description: 'Herramientas administrativas y de gestión interna',
       color: 'from-indigo-500 to-blue-600',
-      features: ['Flujo de caja', 'Auditorías', 'Control de entregables'],
+      features: [
+        'Flujo de caja',
+        'Gestión de proveedores',
+        'Novedades de nómina',
+        'Control de entregables',
+        'Auditorías y reportes',
+        'Gestión de contratistas'
+      ],
       link: '/admin-apps'
     },
-    { 
-      id: 'externos', 
-      label: 'Externos', 
-      icon: ExternalLink, 
-      description: 'Plataformas integradas',
+    {
+      id: 'externos',
+      label: 'Integraciones Externas',
+      icon: ExternalLink,
+      description: 'Plataformas y servicios integrados al ecosistema Sirius',
       color: 'from-purple-500 to-pink-600',
-      features: ['Airtable', 'Cloudinary', 'WhatsApp Bots'],
+      features: [
+        'Airtable (bases de datos y formularios)',
+        'Cloudinary (gestión multimedia)',
+        'WhatsApp y Telegram Bots',
+        'Integración con sistemas de monitoreo',
+        'Conectores para blockchain y Sirius Coin'
+      ],
       link: '/externos'
     },
-    { 
-      id: 'reuniones', 
-      label: 'Reuniones', 
-      icon: Users, 
-      description: 'Gestión colaborativa',
+    {
+      id: 'reuniones',
+      label: 'Reuniones',
+      icon: Users,
+      description: 'Gestión colaborativa de reuniones y actas digitales',
       color: 'from-cyan-500 to-blue-600',
-      features: ['Actas digitales', 'Seguimiento de tareas', 'Agendas inteligentes'],
+      features: [
+        'Actas digitales con audio, video e imagen',
+        'Seguimiento de tareas',
+        'Agendas inteligentes',
+        'Resúmenes automáticos',
+        'Registro de asistencia',
+        'Formularios de reunión integrados'
+      ],
       link: '/reuniones'
     },
-    { 
-      id: 'reportar', 
-      label: 'Soporte', 
-      icon: AlertCircle, 
-      description: 'Asistencia técnica',
+    {
+      id: 'reportar',
+      label: 'Soporte y Reportes',
+      icon: AlertCircle,
+      description: 'Canal de soporte técnico y reporte de incidentes',
       color: 'from-red-500 to-pink-600',
-      features: ['Reporte de incidentes', 'Soporte 24/7', 'Mejoras continuas'],
+      features: [
+        'Reporte de incidentes',
+        'Soporte técnico a usuarios',
+        'Seguimiento de tickets',
+        'Mejoras continuas',
+        'Canal directo con el equipo Sirius'
+      ],
       link: '/reportar'
     }
   ]
@@ -304,13 +350,13 @@ export default function HomePage() {
                     </div>
                     
                     <p className="text-blue-200/80 text-lg leading-relaxed">
-                      {section.id === 'alma' && "Tu asistente virtual inteligente que combina IA conversacional con el conocimiento institucional de Sirius para guiarte en cada proceso."}
-                      {section.id === 'documentacion' && "Acceso centralizado a toda la documentación técnica, APIs, flujos automatizados y guías de implementación del ecosistema Sirius."}
-                      {section.id === 'smartbots' && "Bots inteligentes que automatizan procesos críticos como gestión de permisos, biochar, compras y firmas digitales."}
-                      {section.id === 'admin-apps' && "Suite de aplicaciones administrativas diseñadas para optimizar la gestión interna y el control de recursos empresariales."}
-                      {section.id === 'externos' && "Integración seamless con plataformas externas esenciales para el funcionamiento del ecosistema tecnológico."}
-                      {section.id === 'reuniones' && "Sistema completo de gestión de reuniones con actas digitales, seguimiento de tareas y agendas colaborativas."}
-                      {section.id === 'reportar' && "Canal directo de comunicación con el equipo técnico para reportar incidentes y solicitar mejoras en tiempo real."}
+                      {section.id === 'alma' && "Asistente institucional basado en IA, entrenado con el conocimiento real de Sirius. Responde dudas, guía procesos y facilita el acceso a recursos y aplicaciones del ecosistema Sirius."}
+                      {section.id === 'documentacion' && "Acceso centralizado y actualizado a la documentación técnica, administrativa y operativa de todas las aplicaciones Sirius. Incluye APIs, flujos, tutoriales, integraciones y manuales reales."}
+                      {section.id === 'smartbots' && "Automatización real de procesos con bots para permisos laborales, biochar, producción, caja y proveedores, laboratorio, pirolisis y más. Integración con Telegram y otros canales."}
+                      {section.id === 'admin-apps' && "Suite de aplicaciones administrativas reales: flujo de caja, gestión de proveedores, novedades de nómina, control de entregables y gestión de contratistas, todas en uso activo por el equipo Sirius."}
+                      {section.id === 'externos' && "Integraciones reales con plataformas externas: Airtable para bases de datos y formularios, Cloudinary para multimedia, WhatsApp/Telegram bots, conectores blockchain y sistemas de monitoreo."}
+                      {section.id === 'reuniones' && "Gestión colaborativa de reuniones Sirius: actas digitales con audio/video, seguimiento de tareas, agendas inteligentes, resúmenes automáticos y registro de asistencia, todo integrado con formularios reales."}
+                      {section.id === 'reportar' && "Canal real de soporte y reporte de incidentes, seguimiento de tickets y mejoras continuas. Comunicación directa con el equipo Sirius para resolver problemas y optimizar el ecosistema."}
                     </p>
                   </div>
 
