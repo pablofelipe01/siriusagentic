@@ -1,12 +1,33 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Bot, Search, Filter, ExternalLink, Star, Zap, Shield, MessageCircle, Phone, Mail, Settings, Users, FileText, Calendar, DollarSign, CheckCircle, AlertTriangle, Clock, Activity, Bell } from 'lucide-react'
+import { ArrowLeft, Bot, Search, Filter, ExternalLink, Star, Zap, Shield, MessageCircle, Phone, Mail, Settings, Users, FileText, Calendar, DollarSign, CheckCircle, AlertTriangle, Clock, Activity, Bell, Database } from 'lucide-react'
+
+// 1. Definir el tipo Bot para tipado estricto
+type Bot = {
+  id: string;
+  name: string;
+  platform: string;
+  category: string;
+  status: string;
+  description: string;
+  features: string[];
+  commands: string[];
+  usage: string;
+  lastUpdate: string;
+  uptime: string;
+  interactions: number;
+  icon?: any;
+  color: string;
+  adminContact: string;
+  documentation: string;
+  image?: string;
+};
 
 export default function SmartBotsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedBot, setSelectedBot] = useState(null)
+  const [selectedBot, setSelectedBot] = useState<Bot | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -22,150 +43,125 @@ export default function SmartBotsPage() {
     { id: 'admin', label: 'Administrativos', icon: Settings, count: 4 }
   ]
 
-  const bots = [
+  const bots: Bot[] = [
     {
-      id: 'permisos-bot',
-      name: 'Bot de Permisos',
-      platform: 'telegram',
-      category: 'admin',
-      status: 'active',
-      description: 'Automatiza el proceso de solicitud y aprobación de permisos laborales',
-      features: ['Solicitud automática', 'Flujo de aprobación', 'Notificaciones', 'Historial'],
-      commands: ['/solicitar', '/estado', '/historial', '/cancelar'],
-      usage: 'Permite a los empleados solicitar permisos directamente desde Telegram',
-      lastUpdate: '2024-12-15',
-      uptime: '99.8%',
-      interactions: 2847,
-      icon: Calendar,
-      color: 'from-blue-500 to-cyan-600',
-      adminContact: '@admin_permisos',
-      documentation: '/docs/permisos-bot'
-    },
-    {
-      id: 'biochar-bot',
-      name: 'Bot de Biochar',
-      platform: 'telegram',
-      category: 'admin',
-      status: 'active',
-      description: 'Gestiona el inventario y distribución de biochar para proyectos regenerativos',
-      features: ['Control de inventario', 'Tracking de distribución', 'Reportes automáticos', 'Alertas de stock'],
-      commands: ['/inventario', '/distribuir', '/reporte', '/alerta'],
-      usage: 'Monitorea y controla el flujo de biochar en tiempo real',
-      lastUpdate: '2024-12-20',
-      uptime: '99.5%',
-      interactions: 1523,
-      icon: Activity,
-      color: 'from-green-500 to-emerald-600',
-      adminContact: '@biochar_admin',
-      documentation: '/docs/biochar-bot'
-    },
-    {
-      id: 'compras-bot',
-      name: 'Bot de Compras',
-      platform: 'telegram',
-      category: 'admin',
-      status: 'active',
-      description: 'Automatiza el proceso de requisiciones y aprobaciones de compras',
-      features: ['Solicitudes de compra', 'Flujo de aprobación', 'Cotizaciones', 'Seguimiento'],
-      commands: ['/comprar', '/cotizar', '/aprobar', '/seguimiento'],
-      usage: 'Streamline del proceso de adquisiciones empresariales',
-      lastUpdate: '2024-12-18',
-      uptime: '98.9%',
-      interactions: 3421,
-      icon: DollarSign,
-      color: 'from-purple-500 to-pink-600',
-      adminContact: '@compras_admin',
-      documentation: '/docs/compras-bot'
-    },
-    {
-      id: 'firmas-bot',
-      name: 'Bot de Firmas Digitales',
-      platform: 'telegram',
-      category: 'admin',
-      status: 'active',
-      description: 'Gestiona el proceso de firmas digitales para documentos corporativos',
-      features: ['Firma digital', 'Validación de documentos', 'Historial de firmas', 'Notificaciones'],
-      commands: ['/firmar', '/validar', '/historial', '/pendientes'],
-      usage: 'Digitalización completa del proceso de firmas documentales',
-      lastUpdate: '2024-12-22',
-      uptime: '99.9%',
-      interactions: 1876,
-      icon: FileText,
-      color: 'from-indigo-500 to-blue-600',
-      adminContact: '@firmas_admin',
-      documentation: '/docs/firmas-bot'
-    },
-    {
-      id: 'whatsapp-soporte',
-      name: 'Agente de Soporte',
-      platform: 'whatsapp',
-      category: 'whatsapp',
-      status: 'active',
-      description: 'Agente de IA para atención al cliente 24/7 en WhatsApp Business',
-      features: ['Respuestas automáticas', 'Escalamiento inteligente', 'Base de conocimiento', 'Métricas'],
-      commands: ['Texto libre', 'Comandos naturales'],
-      usage: 'Primera línea de atención al cliente con IA conversacional',
-      lastUpdate: '2024-12-21',
-      uptime: '99.7%',
-      interactions: 5632,
-      icon: MessageCircle,
-      color: 'from-green-500 to-teal-600',
-      adminContact: '+57 300 123 4567',
-      documentation: '/docs/whatsapp-soporte'
-    },
-    {
-      id: 'whatsapp-ventas',
-      name: 'Agente de Ventas',
-      platform: 'whatsapp',
-      category: 'whatsapp',
-      status: 'beta',
-      description: 'Bot especializado en calificación de leads y proceso de ventas',
-      features: ['Calificación de leads', 'Cotizaciones automáticas', 'Seguimiento', 'CRM integrado'],
-      commands: ['Conversación natural', 'Intents automáticos'],
-      usage: 'Automatización del funnel de ventas desde WhatsApp',
-      lastUpdate: '2024-12-19',
-      uptime: '97.2%',
-      interactions: 2341,
-      icon: DollarSign,
-      color: 'from-orange-500 to-red-600',
-      adminContact: '+57 300 123 4568',
-      documentation: '/docs/whatsapp-ventas'
-    },
-    {
-      id: 'email-reports',
-      name: 'Bot de Reportes',
-      platform: 'email',
-      category: 'email',
-      status: 'active',
-      description: 'Genera y envía reportes automáticos por email',
-      features: ['Reportes programados', 'Dashboards', 'Alertas', 'Personalización'],
-      commands: ['Configuración por interfaz web'],
-      usage: 'Automatización de reportes periódicos a stakeholders',
-      lastUpdate: '2024-12-17',
-      uptime: '99.1%',
-      interactions: 892,
-      icon: Mail,
-      color: 'from-cyan-500 to-blue-600',
-      adminContact: 'reportes@sirius.com',
-      documentation: '/docs/email-reports'
-    },
-    {
-      id: 'telegram-notifs',
-      name: 'Bot de Notificaciones',
+      id: 'biogas-v4',
+      name: 'Biogas V4.0',
       platform: 'telegram',
       category: 'telegram',
       status: 'active',
-      description: 'Sistema centralizado de notificaciones para equipos',
-      features: ['Notificaciones personalizadas', 'Canales temáticos', 'Programación', 'Prioridades'],
-      commands: ['/suscribir', '/configurar', '/silenciar', '/prioridad'],
-      usage: 'Hub central de comunicaciones internas automáticas',
-      lastUpdate: '2024-12-23',
-      uptime: '99.6%',
-      interactions: 4521,
-      icon: Bell,
+      description: 'Registro de los datos del proceso de Biogás.',
+      features: ['Registro de datos', 'Alertas automáticas', 'Historial de procesos'],
+      commands: ['/registrar', '/alertas', '/historial'],
+      usage: 'Monitorea y registra el proceso de biogás en Guaicaramo.',
+      lastUpdate: '2025-07-01',
+      uptime: '99.8%',
+      interactions: 1200,
+      icon: null, // Usaremos imagen personalizada
+      color: 'from-green-500 to-emerald-600',
+      adminContact: 'Guaicaramo Biogas',
+      documentation: 'https://t.me/BioGasManager_bot',
+      image: 'https://res.cloudinary.com/dvnuttrox/image/upload/v1751483657/Biogasbot_xpa8y3.png'
+    },
+    {
+      id: 'piroliapp-v4',
+      name: 'Piroliapp V4.0',
+      platform: 'telegram',
+      category: 'telegram',
+      status: 'active',
+      description: 'Registro de producción de la planta de pirolisis.',
+      features: ['Registro de producción', 'Alertas', 'Reportes automáticos'],
+      commands: ['/registrar', '/reporte', '/alerta'],
+      usage: 'Permite registrar y monitorear la producción de pirolisis.',
+      lastUpdate: '2025-07-01',
+      uptime: '99.5%',
+      interactions: 900,
+      icon: null, // Usaremos imagen personalizada
       color: 'from-yellow-500 to-orange-600',
-      adminContact: '@notif_admin',
-      documentation: '/docs/telegram-notifs'
+      adminContact: 'Equipo pirolisis',
+      documentation: 'https://t.me/PiroliBot_bot',
+      image: 'https://res.cloudinary.com/dvnuttrox/image/upload/v1751483657/Pirolibot_hwx3pa.png'
+    },
+    {
+      id: 'labi-data-lab-v3',
+      name: 'Labi - Data Lab V3.0',
+      platform: 'telegram',
+      category: 'telegram',
+      status: 'active',
+      description: 'Permite hacer remisiones.',
+      features: ['Remisiones', 'Historial', 'Notificaciones'],
+      commands: ['/remitir', '/historial', '/notificar'],
+      usage: 'Gestión de remisiones para el equipo laboratorio.',
+      lastUpdate: '2025-07-01',
+      uptime: '99.7%',
+      interactions: 800,
+      icon: null, // Usaremos imagen personalizada
+      color: 'from-blue-500 to-cyan-600',
+      adminContact: 'Equipo laboratorio',
+      documentation: 'https://t.me/L4BI_bot',
+      image: 'https://res.cloudinary.com/dvnuttrox/image/upload/v1751483657/LABI_el_robot_cient%C3%ADfico_jzqebp.png'
+    },
+    {
+      id: 'prueba-cacao',
+      name: 'Prueba de Cacao',
+      platform: 'telegram',
+      category: 'telegram',
+      status: 'active',
+      description: 'Registro de producción de cacao y cosecha de la plantación.',
+      features: ['Registro de producción', 'Alertas', 'Reportes'],
+      commands: ['/registrar', '/reporte', '/alerta'],
+      usage: 'Permite registrar la producción y cosecha de cacao.',
+      lastUpdate: '2025-07-01',
+      uptime: '99.6%',
+      interactions: 500,
+      icon: Zap,
+      color: 'from-green-700 to-yellow-500',
+      adminContact: 'Angela Acosta',
+      documentation: 'https://t.me/CR0P_bot',
+      image: ''
+    },
+    {
+      id: 'automa',
+      name: 'AUTOMA',
+      platform: 'telegram',
+      category: 'telegram',
+      status: 'active',
+      description: 'Bot financiero para gestión de flujo de caja y proveedores.',
+      features: ['Gestión de caja', 'Alertas', 'Integración con formularios'],
+      commands: ['/flujo', '/proveedores', '/alerta'],
+      usage: 'Automatiza el flujo de caja y la gestión de proveedores.',
+      lastUpdate: '2025-07-01',
+      uptime: '99.9%',
+      interactions: 700,
+      icon: null, // Usaremos imagen personalizada
+      color: 'from-purple-500 to-pink-600',
+      adminContact: 'Alejandro, Carolina, Fernanda',
+      documentation: 'https://t.me/AUT0MA_bot',
+      image: 'https://res.cloudinary.com/dvnuttrox/image/upload/v1751483657/Automa_w95fak.png'
+    },
+    {
+      id: 'dona-pepa',
+      name: 'Doña Pepa',
+      platform: 'whatsapp',
+      category: 'whatsapp',
+      status: 'active',
+      description: 'Agente de IA conversacional para atención y gestión en WhatsApp. Responde consultas, guía procesos y conecta con usuarios de Guaicaramo.',
+      features: [
+        'Respuestas automáticas 24/7',
+        'Atención personalizada',
+        'Escalamiento inteligente',
+        'Soporte a usuarios internos y externos'
+      ],
+      commands: ['Texto libre', 'Comandos naturales'],
+      usage: 'Agente de WhatsApp para atención y soporte en Guaicaramo.',
+      lastUpdate: '2025-07-01',
+      uptime: '99.9%',
+      interactions: 12000,
+      icon: null, // Usaremos imagen personalizada
+      image: 'https://res.cloudinary.com/dvnuttrox/image/upload/v1751462936/do%C3%B1apepa_tqzvae.jpg',
+      color: 'from-green-500 to-teal-600',
+      adminContact: '+57 313 2552326',
+      documentation: '/documentacion?cat=guides#dona-pepa'
     }
   ]
 
@@ -176,7 +172,8 @@ export default function SmartBotsPage() {
     return matchesSearch && matchesCategory
   })
 
-  const getStatusColor = (status) => {
+  // 3. Tipar helpers
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'text-green-400 bg-green-500/20'
       case 'beta': return 'text-yellow-400 bg-yellow-500/20'
@@ -185,7 +182,7 @@ export default function SmartBotsPage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active': return CheckCircle
       case 'beta': return Clock
@@ -297,7 +294,11 @@ export default function SmartBotsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className={`p-3 rounded-xl bg-gradient-to-r ${bot.color}`}>
-                      <BotIcon className="w-6 h-6 text-white" />
+                      {bot.image ? (
+                        <img src={bot.image} alt={bot.name} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow" />
+                      ) : (
+                        BotIcon && <BotIcon className="w-6 h-6 text-white" />
+                      )}
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-white group-hover:text-orange-300 transition-colors">
@@ -381,7 +382,11 @@ export default function SmartBotsPage() {
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <div className={`p-4 rounded-xl bg-gradient-to-r ${selectedBot.color}`}>
-                    <selectedBot.icon className="w-8 h-8 text-white" />
+                    {selectedBot.image ? (
+                      <img src={selectedBot.image} alt={selectedBot.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow" />
+                    ) : (
+                      selectedBot.icon && <selectedBot.icon className="w-8 h-8 text-white" />
+                    )}
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">{selectedBot.name}</h2>
@@ -468,10 +473,16 @@ export default function SmartBotsPage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-white mb-2">Documentación</h4>
-                    <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-3 flex items-center justify-center space-x-2 hover:shadow-lg transition-all">
-                      <ExternalLink className="w-4 h-4" />
-                      <span>Ver Docs</span>
-                    </button>
+                    <div className="bg-slate-700/50 rounded-lg p-3 text-blue-200 text-sm break-words">
+                      {selectedBot.documentation.startsWith('http') || selectedBot.documentation.startsWith('/') ? (
+                        <a href={selectedBot.documentation} className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-3 flex items-center justify-center space-x-2 hover:shadow-lg transition-all" target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4" />
+                          <span>Ver Docs</span>
+                        </a>
+                      ) : (
+                        <span>{selectedBot.documentation}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
