@@ -4,6 +4,23 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield, Mail, Phone, MapPin, Linkedin, Facebook, Instagram } from 'lucide-react'
 
+// Tipos para las apps y secciones
+interface AdminApp {
+  text: string;
+  route: string;
+}
+
+interface Section {
+  id: string;
+  label: string;
+  image: string;
+  title: string;
+  content: string;
+  buttonText?: string;
+  route?: string;
+  apps?: AdminApp[];
+}
+
 export default function HomePage() {
   const router = useRouter()
   const [isVideoLoaded, setIsVideoLoaded] = useState(false)
@@ -11,11 +28,11 @@ export default function HomePage() {
   const [activeSection, setActiveSection] = useState('')
   const [scrollY, setScrollY] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const [sectionProgress, setSectionProgress] = useState({})
+  const [sectionProgress, setSectionProgress] = useState<Record<string, number>>({})
   const [currentSection, setCurrentSection] = useState(0)
-  const videoRef = useRef(null)
-  const headerRef = useRef(null)
-  const sectionsRef = useRef([])
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const headerRef = useRef<HTMLElement | null>(null)
+  const sectionsRef = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
@@ -37,28 +54,23 @@ export default function HomePage() {
     const handleScroll = () => {
       const scrollTop = window.pageYOffset
       setScrollY(scrollTop)
-      
       // Calcular progreso de cada sección
-      const newProgress = {}
+      const newProgress: Record<string, number> = {}
       const windowHeight = window.innerHeight
-      
       sectionsRef.current.forEach((section, index) => {
         if (section) {
           const rect = section.getBoundingClientRect()
           const sectionTop = rect.top + scrollTop
           const sectionHeight = rect.height
-          
           // Calcular progreso de la sección (0 a 1)
           const progress = Math.max(0, Math.min(1, (scrollTop - sectionTop + windowHeight) / (sectionHeight + windowHeight)))
           newProgress[`section-${index}`] = progress
-          
           // Determinar sección actual
           if (rect.top <= windowHeight * 0.5 && rect.bottom >= windowHeight * 0.5) {
             setCurrentSection(index)
           }
         }
       })
-      
       setSectionProgress(newProgress)
     }
 
@@ -68,7 +80,7 @@ export default function HomePage() {
   }, [])
 
   // Función para manejar navegación interna
-  const handleNavigation = (sectionId) => {
+  const handleNavigation = (sectionId: string) => {
     switch(sectionId) {
       case 'alma':
         router.push('/chat')
@@ -89,7 +101,7 @@ export default function HomePage() {
     }
   }
 
-  const customSections = [
+  const customSections: Section[] = [
     {
       id: 'about',
       label: 'About',
@@ -101,21 +113,48 @@ export default function HomePage() {
     },
     {
       id: 'aplicaciones',
-      label: 'Aplicaciones',
+      label: 'Aplicaciones administrativas',
       image: '/DSC_3285.jpg',
-      title: 'Aplicaciones Sirius',
+      title: 'Aplicaciones administrativas',
       content: `Desarrollamos herramientas internas y plataformas a medida que conectan datos, personas y procesos. Desde gestión documental hasta automatización de flujos, nuestras apps están diseñadas para la eficiencia y la transparencia.`,
-      buttonText: 'Ver Aplicaciones',
-      route: '/aplicaciones'
+      apps: [
+        { text: 'Novedades de nómina', route: 'https://novedadesnomina.s3.us-east-1.amazonaws.com/Index_Novedades_Nomina.html' },
+        { text: 'AUTOMA (Financiero)', route: 'https://t.me/AUT0MA_bot' },
+        { text: 'Solicitudes de compras', route: 'https://siriusadministrativo.s3.us-east-1.amazonaws.com/Formato+Solicitud+Compra+Adquisiciones.html' },
+        { text: 'Proveedores', route: 'https://proveedores-gamma.vercel.app/' },
+        { text: 'Sirius Coins', route: 'https://airtable.com/app5o1BKy3divPinG/pagGWVLIk07fYaiuo/form' }
+      ]
     },
     {
-      id: 'smartbots',
-      label: 'SmartBots',
-      image: '/DJI_0543.JPG',
-      title: 'SmartBots',
-      content: `Nuestros bots inteligentes automatizan tareas repetitivas, integran IA en la operación diaria y permiten a los equipos enfocarse en lo que realmente importa. Telegram, WhatsApp y más, conectados al corazón de Sirius.`,
-      buttonText: 'Explorar Bots',
-      route: '/smartbots'
+      id: 'aplicaciones-tecnicas',
+      label: 'Aplicaciones técnicas',
+      image: '/DSC_3466.jpg',
+      title: 'Aplicaciones técnicas',
+      content: `Soluciones tecnológicas avanzadas para la operación, automatización y análisis de datos en Sirius.`,
+      apps: [
+        { text: 'DAO', route: 'https://cliente-dao.vercel.app/' },
+        { text: 'DataLab', route: 'https://www.consultaia.app/' },
+        { text: 'LABI', route: 'https://t.me/L4BI_bot' },
+        { text: 'Biogasbot', route: 'https://t.me/BioGasManager_bot' },
+        { text: 'Pirolibot', route: 'https://t.me/PiroliBot_bot' }
+      ]
+    },
+    {
+      id: 'dona-pepa',
+      label: 'Doña Pepa',
+      image: '/DSC_3285.jpg',
+      title: 'Doña Pepa',
+      content: `Chatea con nuestro agente de inteligencia artificial a la vanguardia de la tecnología.`,
+      apps: [
+        { text: 'Chatear con Doña Pepa', route: 'https://wa.me/573132552326?text=Hola%20Doña%20Pepa!' }
+      ]
+    },
+    {
+      id: 'reuniones',
+      label: 'Reuniones',
+      image: '/DSC_3239.jpg',
+      title: 'Reuniones',
+      content: `Accede a la gestión y programación de reuniones institucionales de Sirius.`,
     },
     {
       id: 'alma',
@@ -213,7 +252,7 @@ export default function HomePage() {
             <section
               key={section.id}
               id={section.id}
-              ref={el => sectionsRef.current[idx] = el}
+              ref={el => { sectionsRef.current[idx] = el }}
               className="relative overflow-hidden"
               style={{ height: '300vh' }}
             >
@@ -306,26 +345,50 @@ export default function HomePage() {
                   >
                     {section.content}
                   </p>
-                  
-                  {/* Botones */}
-                  <div 
-                    className="flex flex-col sm:flex-row gap-4"
-                    style={{
-                      transform: showContent ? 'translateY(0)' : 'translateY(30px)',
-                      transition: 'transform 0.8s ease-out 0.4s'
-                    }}
-                  >
-                    <button 
-                      onClick={() => router.push(section.route)}
-                      className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
+                  {/* Botón o mensaje especial solo para la primera sección */}
+                  {idx === 0 ? (
+                    <div className="flex flex-col items-center justify-center mt-8">
+                      <span className="text-white text-lg sm:text-xl font-semibold animate-fade-in-up" style={{textShadow: '0 2px 10px rgba(0,0,0,0.5)'}}>Conocer más</span>
+                      <ChevronDown size={40} style={{marginTop: 8, color: '#00A3FF'}} className="animate-bounce" />
+                    </div>
+                  ) : section.apps ? (
+                    <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                      {section.apps.map(app => (
+                        <button
+                          key={app.text}
+                          onClick={() => { window.location.href = app.route; }}
+                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-6 py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden min-w-[180px] flex items-center justify-center"
+                        >
+                          <span className="relative z-10 flex items-center gap-2">
+                            {app.text}
+                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                          </span>
+                          <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div 
+                      className="flex flex-col sm:flex-row gap-4"
+                      style={{
+                        transform: showContent ? 'translateY(0)' : 'translateY(30px)',
+                        transition: 'transform 0.8s ease-out 0.4s'
+                      }}
                     >
-                      <span className="relative z-10 flex items-center gap-2">
-                        {section.buttonText}
-                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
-                      </span>
-                      <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-                    </button>
-                  </div>
+                      {section.route && section.buttonText && (
+                        <button 
+                          onClick={() => router.push(section.route!)}
+                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
+                        >
+                          <span className="relative z-10 flex items-center gap-2">
+                            {section.buttonText}
+                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+                          </span>
+                          <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                        </button>
+                      )}
+                    </div>
+                  )}
                   
                   {/* Indicadores de progreso */}
                   <div className="flex space-x-2 mt-8 justify-center lg:justify-start">
