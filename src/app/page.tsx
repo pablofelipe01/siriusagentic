@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield } from 'lucide-react'
+import './globals.css'
 
 export default function HomePage() {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false)
@@ -162,6 +163,16 @@ export default function HomePage() {
     }
   ]
 
+  const sectionImages = [
+    '/DJI_0026.JPG', // Para la sección 'alma'
+    '/DSC_3239.jpg',
+    '/DSC_3285.jpg',
+    '/DSC_3466.jpg',
+    '/DSC_3197.jpg',
+    '/DJI_0543.JPG',
+    '/DJI_0909.jpg'
+  ]
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id)
     if (el) {
@@ -174,278 +185,103 @@ export default function HomePage() {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center z-50">
         <div className="text-center space-y-6">
-          <div className="relative">
-            <div className="w-24 h-24 border-4 border-blue-200/20 rounded-full animate-spin border-t-blue-400"></div>
-            <div className="absolute inset-0 w-24 h-24 border-4 border-transparent rounded-full animate-ping border-t-blue-300"></div>
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Sirius</h2>
-            <p className="text-blue-200 animate-pulse">Cargando experiencia...</p>
-          </div>
+          <img src="/logo.png" alt="Sirius Logo" className="w-24 h-24 mx-auto mb-4 object-contain" />
+          <h2 className="text-2xl font-bold text-white">Sirius</h2>
+          <p className="text-blue-200 animate-pulse">Cargando experiencia...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Background Video */}
-      <div className="fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-blue-900/70 to-indigo-900/80 z-10" />
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className={`absolute min-w-full min-h-full object-cover transition-all duration-2000 ${isVideoLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
-        >
-          <source src="/ai.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent z-10" />
-      </div>
-
-      {/* Header */}
-      <header 
-        ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          scrollY > 50 
-            ? 'bg-slate-900/95 backdrop-blur-lg border-b border-blue-500/20' 
-            : 'bg-transparent'
-        }`}
-        style={{
-          transform: `translateY(${Math.max(-100, scrollY * -0.1)}px)`
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center">
-              <Star className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">Sirius</h1>
-              <p className="text-xs text-blue-300">Regenerative Solutions</p>
-            </div>
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            {sections.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => scrollToSection(id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
-                  activeSection === id
-                    ? 'bg-blue-500/20 text-blue-300 shadow-lg'
-                    : 'text-blue-200 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <Icon size={16} />
-                <span>{label}</span>
-              </button>
-            ))}
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
-          >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className={`lg:hidden transition-all duration-300 overflow-hidden ${
-          isMenuOpen ? 'max-h-96 bg-slate-900/95 backdrop-blur-lg border-t border-blue-500/20' : 'max-h-0'
-        }`}>
-          <div className="px-6 py-4 space-y-2">
-            {sections.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => scrollToSection(id)}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <Icon size={18} />
-                <span>{label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="relative min-h-screen bg-black">
+      {/* Header minimalista */}
+      <header className="fixed top-0 left-0 right-0 z-40 bg-[#0154AC]/95 backdrop-blur-md border-b border-[#00B602]/10 flex items-center justify-between px-10 py-2" style={{fontFamily: 'Utile, Arial, sans-serif'}}>
+        <img src="/logo.png" alt="Sirius Logo" className="w-[200px] h-auto object-contain" style={{minWidth: 85}} />
+        <nav className="flex space-x-6">
+          {sections.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => scrollToSection(id)}
+              className={`text-[#BCD7EA] hover:text-[#00A3FF] px-4 py-2 rounded-lg text-lg font-bold transition-colors tracking-tight ${activeSection === id ? 'bg-[#00B602]/20 text-[#00B602]' : ''}`}
+              style={{fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-1px'}}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
       </header>
 
-      {/* Main Content */}
-      <main className="relative z-20 pt-24">
-        {/* Hero Section */}
-        <section className="min-h-screen flex items-center justify-center px-6">
-          <div className="max-w-6xl mx-auto text-center space-y-8">
-            <div className="space-y-6 animate-fade-in">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500/20 rounded-full text-blue-300 text-sm font-medium backdrop-blur-sm">
-                <Zap className="w-4 h-4" />
-                <span>Plataforma Inteligente</span>
-              </div>
-              
-              <h1 className="text-5xl md:text-7xl font-bold">
-                <span className="bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent">
-                  Sirius
-                </span>
-                <br />
-                <span className="text-3xl md:text-4xl font-normal text-blue-200">
-                  Regenerative Solutions
-                </span>
-              </h1>
-              
-              <p className="text-xl text-blue-200/80 max-w-3xl mx-auto leading-relaxed">
-                Ecosistema tecnológico avanzado que integra inteligencia artificial, 
-                automatización y gestión empresarial en una plataforma unificada.
+      {/* Main Content con scroll snap y gradiente sutil */}
+      <main className="pt-24 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth bg-gradient-to-br from-[#CFE4BF] via-[#BCD7EA] to-[#0154AC]">
+        {/* Imagen principal */}
+        <section className="snap-start min-h-screen flex items-center justify-center relative">
+          <img src="/DSC_2889.jpg" alt="Sirius principal" className="absolute inset-0 w-full h-full object-cover object-center max-h-screen max-w-full" style={{height: '100vh', width: '100vw'}} />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-center w-full h-full px-4 md:px-8 gap-8">
+            <div className="flex flex-col items-start md:justify-center md:w-1/2 w-full mb-10 md:mb-0">
+              <h1 className="text-[#0154AC] text-[8vw] md:text-[60px] font-bold mb-2 leading-tight" style={{fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-2px'}}>Sirius Agentics</h1>
+              <p className="text-[#00B602] text-xl md:text-2xl mb-4 font-medium" style={{fontFamily: 'Utile, Arial, sans-serif'}}>Regenerative Solutions</p>
+            </div>
+            <div className="flex-1 flex items-center justify-center w-full">
+              <p className="text-[#1A1A33] text-3xl md:text-5xl lg:text-6xl font-bold text-center" style={{fontFamily: 'IvyPresto, serif', fontStyle: 'italic'}}>
+                Tecnología + Naturaleza = Innovación
               </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-              <button
-                onClick={() => scrollToSection('alma')}
-                className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Comenzar con Alma</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              
-              <button
-                onClick={() => scrollToSection('documentacion')}
-                className="px-8 py-4 border border-blue-400/30 rounded-xl text-blue-200 font-semibold hover:bg-blue-500/10 transition-all duration-300 backdrop-blur-sm"
-              >
-                Explorar Documentación
-              </button>
-            </div>
-
-            <div className="pt-16 animate-bounce">
-              <ChevronDown className="w-8 h-8 text-blue-300 mx-auto" />
             </div>
           </div>
         </section>
-
-        {/* Sections */}
-        <div className="space-y-32 px-6 pb-32">
-          {sections.map((section, index) => (
-            <section
-              key={section.id}
-              id={section.id}
-              className="max-w-6xl mx-auto"
-            >
-              <div className={`grid lg:grid-cols-2 gap-12 items-center ${
-                index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''
-              }`}>
-                {/* Content */}
-                <div className={`space-y-8 ${index % 2 === 1 ? 'lg:col-start-2' : ''}`}>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-3 rounded-xl bg-gradient-to-r ${section.color}`}>
-                        <section.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-3xl font-bold text-white">{section.label}</h2>
-                        <p className="text-blue-300">{section.description}</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-blue-200/80 text-lg leading-relaxed">
-                      {section.id === 'alma' && "Asistente institucional basado en IA, entrenado con el conocimiento real de Sirius. Responde dudas, guía procesos y facilita el acceso a recursos y aplicaciones del ecosistema Sirius."}
-                      {section.id === 'documentacion' && "Acceso centralizado y actualizado a la documentación técnica, administrativa y operativa de todas las aplicaciones Sirius. Incluye APIs, flujos, tutoriales, integraciones y manuales reales."}
-                      {section.id === 'smartbots' && "Automatización real de procesos con bots para permisos laborales, biochar, producción, caja y proveedores, laboratorio, pirolisis y más. Integración con Telegram y otros canales."}
-                      {section.id === 'admin-apps' && "Suite de aplicaciones administrativas reales: flujo de caja, gestión de proveedores, novedades de nómina, control de entregables y gestión de contratistas, todas en uso activo por el equipo Sirius."}
-                      {section.id === 'externos' && "Integraciones reales con plataformas externas: Airtable para bases de datos y formularios, Cloudinary para multimedia, WhatsApp/Telegram bots, conectores blockchain y sistemas de monitoreo."}
-                      {section.id === 'reuniones' && "Gestión colaborativa de reuniones Sirius: actas digitales con audio/video, seguimiento de tareas, agendas inteligentes, resúmenes automáticos y registro de asistencia, todo integrado con formularios reales."}
-                      {section.id === 'reportar' && "Canal real de soporte y reporte de incidentes, seguimiento de tickets y mejoras continuas. Comunicación directa con el equipo Sirius para resolver problemas y optimizar el ecosistema."}
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
-                      <Shield className="w-5 h-5 text-blue-400" />
-                      <span>Características principales</span>
-                    </h3>
-                    <div className="grid gap-3">
-                      {section.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center space-x-3 text-blue-200">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                          <span>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => window.location.href = section.link}
-                    className={`group inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r ${section.color} rounded-lg text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
-                      section.id === 'reportar' ? 'from-red-500 to-pink-600' : ''
-                    }`}
-                  >
-                    <section.icon className="w-5 h-5" />
-                    <span>
-                      {section.id === 'alma' && 'Iniciar Chat'}
-                      {section.id === 'documentacion' && 'Ver Documentación'}
-                      {section.id === 'smartbots' && 'Explorar Bots'}
-                      {section.id === 'admin-apps' && 'Acceder a Apps'}
-                      {section.id === 'externos' && 'Ver Plataformas'}
-                      {section.id === 'reuniones' && 'Gestionar Reuniones'}
-                      {section.id === 'reportar' && 'Reportar Problema'}
-                    </span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-
-                {/* Visual Element */}
-                <div className={`${index % 2 === 1 ? 'lg:col-start-1' : ''}`}>
-                  <div className={`relative p-8 bg-gradient-to-br ${section.color} rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300`}>
-                    <div className="absolute inset-0 bg-black/20 rounded-2xl"></div>
-                    <div className="relative text-center text-white space-y-4">
-                      <section.icon className="w-16 h-16 mx-auto opacity-80" />
-                      <h3 className="text-2xl font-bold">{section.label}</h3>
-                      <div className="flex justify-center space-x-2">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="w-2 h-2 bg-white/50 rounded-full animate-pulse" style={{animationDelay: `${i * 0.2}s`}}></div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          ))}
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="relative z-20 bg-slate-900/90 backdrop-blur-lg border-t border-blue-500/20">
-        <div className="max-w-6xl mx-auto px-6 py-12 text-center space-y-6">
-          <div className="flex items-center justify-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
-              <Star className="w-5 h-5 text-white" />
+        {/* Secciones con scroll snap, foto diferente y animación al entrar */}
+        {sections.map((section, index) => (
+          <section
+            key={section.id}
+            id={section.id}
+            className="snap-start min-h-screen flex items-center justify-center relative group"
+          >
+            <img
+              src={sectionImages[index % sectionImages.length]}
+              alt={section.label}
+              className="absolute inset-0 w-full h-full object-cover object-center max-h-screen max-w-full" style={{height: '100vh', width: '100vw'}}
+            />
+            <div className="relative z-10 max-w-2xl w-full mx-auto text-center p-4 md:p-10 section-fade-in" style={{fontFamily: 'Utile, Arial, sans-serif'}}>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#0154AC] mb-2" style={{fontFamily: 'Utile, Arial, sans-serif'}}>{section.label}</h2>
+              <p className="text-[#0154AC] mb-4 text-base md:text-lg">{section.description}</p>
+              <ul className="text-[#00B602] text-left list-disc list-inside space-y-2 mb-4 text-sm md:text-base">
+                {section.features.map((feature, idx) => (
+                  <li key={idx}>{feature}</li>
+                ))}
+              </ul>
+              <button
+                onClick={() => window.location.href = section.link}
+                className="mt-4 px-6 md:px-8 py-3 md:py-4 bg-[#00A3FF] hover:bg-[#00B602] rounded-lg text-white font-black shadow-lg transition-all duration-300 text-base md:text-lg"
+                style={{fontFamily: 'Utile, Arial, sans-serif', fontSize: 'clamp(16px,2vw,24px)', boxShadow: '0 2px 24px #BCD7EA88'}}
+              >
+                Ir a {section.label}
+              </button>
             </div>
-            <span className="text-xl font-bold text-white">Sirius Regenerative Solutions</span>
-          </div>
-          
-          <p className="text-blue-300 max-w-2xl mx-auto">
-            Transformando el futuro empresarial a través de tecnología regenerativa, 
-            inteligencia artificial y automatización inteligente.
-          </p>
-          
-          <div className="pt-6 border-t border-blue-500/20">
-            <p className="text-blue-400 text-sm">
-              © 2025 SIRIUS REGENERATIVE SOLUTIONS S.A.S ZOMAC. Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
+          </section>
+        ))}
+      </main>
+      <footer className="relative z-20 bg-[#1A1A33] text-center text-[#BCD7EA] py-6 border-t border-[#00B602]/20" style={{fontFamily: 'Utile, Arial, sans-serif', fontSize: 18}}>
+        © 2025 SIRIUS REGENERATIVE SOLUTIONS S.A.S ZOMAC. Todos los derechos reservados.
       </footer>
-
       <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(30px); }
+        @import url('https://fonts.googleapis.com/css2?family=Utile:wght@400;700;900&family=Ivy+Presto:ital,wght@1,400&display=swap');
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(60px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in {
-          animation: fade-in 1s ease-out forwards;
+        .section-fade-in {
+          opacity: 0;
+          transform: translateY(60px);
+          transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        section:target .section-fade-in,
+        section:focus-within .section-fade-in {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        section:first-of-type .section-fade-in {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
     </div>
