@@ -33,6 +33,8 @@ export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const headerRef = useRef<HTMLElement | null>(null)
   const sectionsRef = useRef<(HTMLElement | null)[]>([])
+  // Ref para el audio de fondo
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
@@ -187,6 +189,12 @@ export default function HomePage() {
 
   return (
     <div className="relative overflow-x-hidden">
+      {/* Audio de fondo sutil */}
+      <audio ref={audioRef} autoPlay loop preload="auto" style={{ position: 'fixed', zIndex: 0, pointerEvents: 'none' }}>
+        <source src="https://res.cloudinary.com/dvnuttrox/video/upload/v1751576063/WhatsApp_Audio_2025-07-03_at_3.43.28_PM_g0wulz.mp3" type="audio/mpeg" />
+        Tu navegador no soporta el audio HTML5.
+      </audio>
+
       {/* Header */}
       <header 
         ref={headerRef}
