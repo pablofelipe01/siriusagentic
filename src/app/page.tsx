@@ -129,7 +129,7 @@ export default function HomePage() {
   ]
 
   const navSections = [
-    { id: 'main-hero', label: 'Inicio' },
+    // Eliminado 'main-hero', ahora solo las secciones dinámicas
     ...customSections.map(s => ({ id: s.id, label: s.label }))
   ]
 
@@ -199,56 +199,6 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="relative z-10">
-        {/* HERO PRINCIPAL */}
-        <section id="main-hero" className="min-h-screen flex items-center justify-center relative overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-purple-900/20"
-            style={{
-              transform: `translateY(${scrollY * 0.5}px)`,
-              opacity: Math.max(0, 1 - scrollY * 0.001)
-            }}
-          />
-          <img 
-            src="/DJI_0909.jpg" 
-            alt="Sirius principal" 
-            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000" 
-            style={{
-              zIndex: 1, 
-              opacity: 0.85,
-              transform: `scale(${1 + scrollY * 0.0003}) translateY(${scrollY * 0.3}px)`
-            }} 
-          />
-          <div 
-            className="relative z-10 flex flex-col items-center lg:items-start justify-center w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-24 lg:py-40 gap-6 lg:gap-10 text-center lg:text-left"
-            style={{
-              minHeight: '70vh',
-              transform: `translateY(${scrollY * 0.2}px)`,
-              opacity: Math.max(0, 1 - scrollY * 0.002)
-            }}
-          >
-            <h1 
-              className="text-[#BCD7EA] text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-2 leading-tight animate-fade-in-up"
-              style={{
-                fontFamily: 'Utile, Arial, sans-serif', 
-                letterSpacing: '-2px',
-                textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
-              }}
-            >
-              Sirius Agentics
-            </h1>
-            <p 
-              className="text-[#BCD7EA] text-lg sm:text-xl md:text-2xl lg:text-3xl mb-4 font-medium max-w-4xl animate-fade-in-up"
-              style={{
-                fontFamily: 'Utile, Arial, sans-serif',
-                animationDelay: '0.3s',
-                textShadow: '0 2px 10px rgba(0, 0, 0, 0.5)'
-              }}
-            >
-              Regenerative Solutions
-            </p>
-          </div>
-        </section>
-
         {/* Secciones dinámicas */}
         {customSections.map((section, idx) => {
           const progress = sectionProgress[`section-${idx}`] || 0
