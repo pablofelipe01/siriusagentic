@@ -282,21 +282,7 @@ export default function HomePage() {
                 />
                 
                 {/* Partículas flotantes */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  {[...Array(6)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-2 h-2 bg-[#00A3FF]/30 rounded-full animate-float"
-                      style={{
-                        left: `${20 + i * 15}%`,
-                        top: `${30 + (i % 3) * 20}%`,
-                        animationDelay: `${i * 0.8}s`,
-                        animationDuration: `${4 + i}s`,
-                        opacity: contentFullyVisible ? 1 : progress > 0.2 ? 0.5 : 0
-                      }}
-                    />
-                  ))}
-                </div>
+                {/* Eliminado: puntos azules animados */}
               </div>
               
               {/* Contenido que aparece con scroll */}
@@ -323,14 +309,6 @@ export default function HomePage() {
                     >
                       {section.title}
                     </h2>
-                    
-                    {/* Línea decorativa */}
-                    <div 
-                      className="h-1 bg-gradient-to-r from-white to-transparent transition-all duration-1000"
-                      style={{
-                        width: showContent ? '96px' : '0px'
-                      }}
-                    />
                   </div>
                   
                   {/* Descripción */}
@@ -389,25 +367,6 @@ export default function HomePage() {
                       )}
                     </div>
                   )}
-                  
-                  {/* Indicadores de progreso */}
-                  <div className="flex space-x-2 mt-8 justify-center lg:justify-start">
-                    {customSections.map((_, i) => (
-                      <div
-                        key={i}
-                        className={`h-1 rounded-full transition-all duration-500 ${
-                          i === idx 
-                            ? 'w-8 bg-white' 
-                            : 'w-1 bg-white/60'
-                        }`}
-                        style={{
-                          opacity: showContent ? 1 : 0,
-                          transform: showContent ? 'translateY(0)' : 'translateY(20px)',
-                          transition: `all 0.5s ease-out ${0.6 + i * 0.1}s`
-                        }}
-                      />
-                    ))}
-                  </div>
                 </div>
               </div>
               
@@ -418,42 +377,7 @@ export default function HomePage() {
         })}
       </main>
 
-      {/* FOOTER */}
-      <footer id="footer" className="relative z-10 bg-gradient-to-r from-[#0154AC] to-[#00A3FF] text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-4">
-              <img 
-                src="/logo.png" 
-                alt="Sirius Logo" 
-                className="w-24 h-auto object-contain" 
-              />
-              <div className="hidden md:block">
-                <p className="text-sm font-medium" style={{fontFamily: 'Utile, Arial, sans-serif'}}>
-                  Regenerative Solutions para el futuro empresarial
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-6">
-              <div className="flex space-x-4">
-                <a href="https://www.linkedin.com/company/sirius-regenerative/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#BCD7EA] transition-colors">
-                  <Linkedin size={20} />
-                </a>
-                <a href="https://www.facebook.com/share/1HBcfbuQ5f/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#BCD7EA] transition-colors">
-                  <Facebook size={20} />
-                </a>
-                <a href="https://www.instagram.com/sirius.colombia?igsh=ejhzaWI2MDQ2OTJj" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#BCD7EA] transition-colors">
-                  <Instagram size={20} />
-                </a>
-              </div>
-              <div className="text-xs text-center md:text-right" style={{fontFamily: 'Utile, Arial, sans-serif'}}>
-                © 2025 SIRIUS REGENERATIVE SOLUTIONS S.A.S ZOMAC
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Eliminado el footer según solicitud del usuario */}
 
       <style jsx>{`
         * {
