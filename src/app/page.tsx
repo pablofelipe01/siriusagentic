@@ -36,10 +36,10 @@ export default function HomePage() {
   // Ref para el audio de fondo
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Ajustar el volumen del audio de fondo
+  // Ajustar el volumen del audio a un nivel muy bajo (0.003)
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.030;
+      audioRef.current.volume = 0.2;
     }
   }, []);
 
@@ -198,7 +198,7 @@ export default function HomePage() {
     <div className="relative overflow-x-hidden">
       {/* Audio de fondo sutil */}
       <audio ref={audioRef} autoPlay loop preload="auto" style={{ position: 'fixed', zIndex: 0, pointerEvents: 'none' }}>
-        <source src="https://res.cloudinary.com/dvnuttrox/video/upload/v1751576063/WhatsApp_Audio_2025-07-03_at_3.43.28_PM_g0wulz.mp3" type="audio/mpeg" />
+        <source src="https://res.cloudinary.com/dvnuttrox/video/upload/v1751577273/WhatsApp_Audio_2025-07-03_at_4.14.09_PM_er0ren.mp3" type="audio/mpeg" />
         Tu navegador no soporta el audio HTML5.
       </audio>
 
