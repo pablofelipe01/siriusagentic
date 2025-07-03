@@ -1,20 +1,23 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
-import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield, Mail, Phone, MapPin, Linkedin, Twitter, Instagram } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield, Mail, Phone, MapPin, Linkedin, Facebook, Instagram } from 'lucide-react'
 
 export default function HomePage() {
+  const router = useRouter()
   const [isVideoLoaded, setIsVideoLoaded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const [scrollY, setScrollY] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const [visibleSections, setVisibleSections] = useState<string[]>([])
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const headerRef = useRef<HTMLElement>(null)
+  const [sectionProgress, setSectionProgress] = useState({})
+  const [currentSection, setCurrentSection] = useState(0)
+  const videoRef = useRef(null)
+  const headerRef = useRef(null)
+  const sectionsRef = useRef([])
 
   useEffect(() => {
-    // Loading animation
     const timer = setTimeout(() => setIsLoading(false), 1500)
     
     const video = videoRef.current
@@ -32,93 +35,109 @@ export default function HomePage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY)
+      const scrollTop = window.pageYOffset
+      setScrollY(scrollTop)
       
-      // Update active section
-      const sections = ['main-hero', 'about', 'aplicaciones', 'smartbots', 'alma']
-      const current = sections.find(section => {
-        const el = document.getElementById(section)
-        if (el) {
-          const rect = el.getBoundingClientRect()
-          return rect.top <= 200 && rect.bottom >= 200
+      // Calcular progreso de cada sección
+      const newProgress = {}
+      const windowHeight = window.innerHeight
+      
+      sectionsRef.current.forEach((section, index) => {
+        if (section) {
+          const rect = section.getBoundingClientRect()
+          const sectionTop = rect.top + scrollTop
+          const sectionHeight = rect.height
+          
+          // Calcular progreso de la sección (0 a 1)
+          const progress = Math.max(0, Math.min(1, (scrollTop - sectionTop + windowHeight) / (sectionHeight + windowHeight)))
+          newProgress[`section-${index}`] = progress
+          
+          // Determinar sección actual
+          if (rect.top <= windowHeight * 0.5 && rect.bottom >= windowHeight * 0.5) {
+            setCurrentSection(index)
+          }
         }
-        return false
       })
-      if (current) setActiveSection(current)
+      
+      setSectionProgress(newProgress)
     }
 
     window.addEventListener('scroll', handleScroll)
+    handleScroll() // Llamar inmediatamente
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => {
-    // Intersection Observer para animaciones de scroll
-    const sectionIds = ['main-hero', ...customSections.map(s => s.id), 'footer']
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setVisibleSections(prev => prev.includes(entry.target.id) ? prev : [...prev, entry.target.id])
-          }
-        })
-      },
-      { threshold: 0.2 }
-    )
-    sectionIds.forEach(id => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-    return () => observer.disconnect()
-  }, [])
+  // Función para manejar navegación interna
+  const handleNavigation = (sectionId) => {
+    switch(sectionId) {
+      case 'alma':
+        router.push('/chat')
+        break
+      case 'aplicaciones':
+        router.push('/aplicaciones')
+        break
+      case 'smartbots':
+        router.push('/smartbots')
+        break
+      case 'about':
+        router.push('/about')
+        break
+      default:
+        // Para otras secciones, hacer scroll normal
+        const el = document.getElementById(sectionId)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
-  // Nueva estructura de secciones
   const customSections = [
     {
       id: 'about',
       label: 'About',
-      image: '/DJI_0909.jpg',
-      animation: 'fade-in-up',
+      image: '/DSC_2889.jpg',
       title: 'Sobre Sirius Agentics',
-      content: `En Sirius Agentics fusionamos tecnología y conciencia para crear soluciones digitales que automatizan procesos, optimizan flujos y potencian la evolución colectiva. Nuestro propósito es liberar el potencial humano a través de la innovación.`
+      content: `En Sirius Agentics fusionamos tecnología y conciencia para crear soluciones digitales que automatizan procesos, optimizan flujos y potencian la evolución colectiva. Nuestro propósito es liberar el potencial humano a través de la innovación.`,
+      buttonText: 'Conocer Más',
+      route: '/about'
     },
     {
       id: 'aplicaciones',
       label: 'Aplicaciones',
       image: '/DSC_3285.jpg',
-      animation: 'slide-in-left',
       title: 'Aplicaciones Sirius',
-      content: `Desarrollamos herramientas internas y plataformas a medida que conectan datos, personas y procesos. Desde gestión documental hasta automatización de flujos, nuestras apps están diseñadas para la eficiencia y la transparencia.`
+      content: `Desarrollamos herramientas internas y plataformas a medida que conectan datos, personas y procesos. Desde gestión documental hasta automatización de flujos, nuestras apps están diseñadas para la eficiencia y la transparencia.`,
+      buttonText: 'Ver Aplicaciones',
+      route: '/aplicaciones'
     },
     {
       id: 'smartbots',
       label: 'SmartBots',
       image: '/DJI_0543.JPG',
-      animation: 'slide-in-right',
       title: 'SmartBots',
-      content: `Nuestros bots inteligentes automatizan tareas repetitivas, integran IA en la operación diaria y permiten a los equipos enfocarse en lo que realmente importa. Telegram, WhatsApp y más, conectados al corazón de Sirius.`
+      content: `Nuestros bots inteligentes automatizan tareas repetitivas, integran IA en la operación diaria y permiten a los equipos enfocarse en lo que realmente importa. Telegram, WhatsApp y más, conectados al corazón de Sirius.`,
+      buttonText: 'Explorar Bots',
+      route: '/smartbots'
     },
     {
       id: 'alma',
       label: 'Alma',
       image: '/DSC_3197.jpg',
-      animation: 'pop-in',
       title: 'Alma: Asistente IA',
-      content: `Alma es nuestro asistente conversacional institucional, capaz de responder preguntas, guiar procesos y facilitar el acceso al conocimiento interno de Sirius.`
+      content: `Alma es nuestro asistente conversacional institucional, capaz de responder preguntas, guiar procesos y facilitar el acceso al conocimiento interno de Sirius.`,
+      buttonText: 'Usar Alma IA',
+      route: '/chat'
     }
   ]
 
-  // Navbar solo con las nuevas secciones
   const navSections = [
     { id: 'main-hero', label: 'Inicio' },
     ...customSections.map(s => ({ id: s.id, label: s.label }))
   ]
 
-  // Calculamos la opacidad del navbar basado en el scroll
   const navbarOpacity = Math.min(scrollY / 100, 0.95)
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      {/* Header completamente transparente y estático */}
+    <div className="relative overflow-x-hidden">
+      {/* Header */}
       <header 
         ref={headerRef}
         className="fixed top-0 left-0 right-0 z-50"
@@ -135,9 +154,7 @@ export default function HomePage() {
               src="/logo.png" 
               alt="Sirius Logo" 
               className="w-32 sm:w-40 md:w-48 lg:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105" 
-              style={{
-                minWidth: 60,
-              }} 
+              style={{ minWidth: 60 }} 
             />
             <button 
               className="lg:hidden text-[#BCD7EA] hover:text-[#00A3FF] transition-colors p-2"
@@ -152,8 +169,12 @@ export default function HomePage() {
               <button
                 key={id}
                 onClick={() => {
-                  const el = document.getElementById(id)
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  if (id === 'main-hero') {
+                    const el = document.getElementById(id)
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  } else {
+                    handleNavigation(id)
+                  }
                   setIsMenuOpen(false)
                 }}
                 className={`text-[#BCD7EA] hover:text-[#00A3FF] px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base lg:text-lg font-bold transition-all duration-300 tracking-tight transform hover:scale-105 relative overflow-hidden ${
@@ -176,28 +197,10 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Video de fondo opcional */}
-      <div className="fixed inset-0 -z-10 opacity-20">
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-          style={{
-            filter: 'blur(3px) brightness(0.3)',
-            transform: `scale(${1 + scrollY * 0.0002})`
-          }}
-        >
-          <source src="/sirius-bg-video.mp4" type="video/mp4" />
-        </video>
-      </div>
-
       {/* Main Content */}
-      <main className="relative z-10 overflow-y-auto snap-y snap-mandatory scroll-smooth">
+      <main className="relative z-10">
         {/* HERO PRINCIPAL */}
-        <section id="main-hero" className="snap-start min-h-screen flex items-center justify-center relative overflow-hidden">
+        <section id="main-hero" className="min-h-screen flex items-center justify-center relative overflow-hidden">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-purple-900/20"
             style={{
@@ -246,150 +249,163 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Secciones personalizadas con animaciones profesionales */}
-        {customSections.map((section, idx) => (
-          <section
-            key={section.id}
-            id={section.id}
-            className="snap-start min-h-screen flex items-center justify-center relative overflow-hidden group"
-          >
-            {/* Imagen de fondo con efecto hover */}
-            <div className="absolute inset-0 transform transition-transform duration-700 group-hover:scale-105">
-              <img 
-                src={section.image} 
-                alt={section.label} 
-                className="w-full h-full object-cover object-center" 
-                style={{ opacity: 0.9 }} 
-              />
-            </div>
-            
-            {/* Overlay con gradiente dinámico */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-purple-900/30 transition-opacity duration-500 group-hover:opacity-70" />
-            
-            {/* Partículas flotantes */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-2 h-2 bg-[#00A3FF]/30 rounded-full animate-float"
-                  style={{
-                    left: `${20 + i * 15}%`,
-                    top: `${30 + (i % 3) * 20}%`,
-                    animationDelay: `${i * 0.8}s`,
-                    animationDuration: `${4 + i}s`
-                  }}
-                />
-              ))}
-            </div>
-            
-            {/* Contenido principal */}
-            <div 
-              className={`relative z-10 flex flex-col items-center lg:items-start justify-center w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-24 lg:py-40 gap-6 lg:gap-10 text-center lg:text-left transform transition-all duration-1000 ease-out ${
-                visibleSections.includes(section.id) 
-                  ? 'opacity-100 translate-y-0 scale-100' 
-                  : 'opacity-0 translate-y-12 scale-95'
-              }`}
-              style={{ minHeight: '70vh' }}
+        {/* Secciones dinámicas */}
+        {customSections.map((section, idx) => {
+          const progress = sectionProgress[`section-${idx}`] || 0
+          const isImageFixed = progress > 0.15 && progress < 0.85
+          const showContent = progress > 0.3
+          const contentFullyVisible = progress > 0.5 && progress < 0.8
+          const imageScale = Math.min(1.1, 1 + progress * 0.1)
+          const contentOpacity = progress < 0.3 ? 0 : progress > 0.7 ? 1 : Math.max(0, Math.min(1, (progress - 0.3) * 2.5))
+          const contentTransform = progress < 0.3 ? 50 : progress > 0.6 ? 0 : Math.max(0, (0.6 - progress) * 125)
+
+          return (
+            <section
+              key={section.id}
+              id={section.id}
+              ref={el => sectionsRef.current[idx] = el}
+              className="relative overflow-hidden"
+              style={{ height: '300vh' }}
             >
-              {/* Título con efecto typewriter */}
-              <div className="relative overflow-hidden">
-                <h2 
-                  className={`text-[#BCD7EA] text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-2 transform transition-all duration-1200 ease-out ${
-                    visibleSections.includes(section.id) 
-                      ? 'opacity-100 translate-x-0' 
-                      : 'opacity-0 -translate-x-full'
-                  }`}
-                  style={{
-                    fontFamily: 'Utile, Arial, sans-serif',
-                    textShadow: '0 4px 30px rgba(0, 0, 0, 0.7)',
-                    letterSpacing: '-1px',
-                    transitionDelay: '0.2s'
-                  }}
-                >
-                  {section.title}
-                </h2>
-                {/* Línea decorativa animada */}
-                <div 
-                  className={`h-1 bg-gradient-to-r from-[#00A3FF] to-transparent transition-all duration-1000 ${
-                    visibleSections.includes(section.id) ? 'w-24' : 'w-0'
-                  }`}
-                  style={{ transitionDelay: '0.8s' }}
-                />
-              </div>
-              
-              {/* Descripción con entrada escalonada */}
-              <p 
-                className={`text-[#BCD7EA] text-base sm:text-lg md:text-xl lg:text-2xl font-medium max-w-4xl leading-relaxed transform transition-all duration-1000 ease-out ${
-                  visibleSections.includes(section.id) 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8'
-                }`}
+              {/* Contenedor de imagen fija */}
+              <div 
+                className={`${isImageFixed ? 'fixed' : 'absolute'} inset-0 w-full h-screen overflow-hidden`}
                 style={{
-                  fontFamily: 'Utile, Arial, sans-serif',
-                  textShadow: '0 2px 15px rgba(0, 0, 0, 0.6)',
-                  transitionDelay: '0.4s'
+                  zIndex: isImageFixed ? 10 : 1,
                 }}
               >
-                {section.content}
-              </p>
-              
-              {/* Botones con animaciones avanzadas */}
-              <div 
-                className={`flex flex-col sm:flex-row gap-4 mt-8 transform transition-all duration-1000 ease-out ${
-                  visibleSections.includes(section.id) 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8'
-                }`}
-                style={{ transitionDelay: '0.6s' }}
-              >
-                <button 
-                  onClick={() => {
-                    if (section.id === 'alma') {
-                      // Aquí va la URL que me proporciones
-                      window.open('URL_DE_ALMA_AQUI', '_blank')
-                    }
-                  }}
-                  className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    {section.id === 'alma' ? 'Usar Alma IA' : 'Descubrir Más'}
-                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
-                  </span>
-                  <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-                </button>
+                <img 
+                  src={section.image} 
+                  alt={section.label} 
+                  className="w-full h-full object-cover object-center transition-transform duration-700" 
+                  style={{ 
+                    opacity: 0.9,
+                    transform: `scale(${imageScale})`
+                  }} 
+                />
                 
-                <button className="group border-2 border-[#BCD7EA] text-[#BCD7EA] hover:bg-[#BCD7EA] hover:text-[#0154AC] px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden">
-                  <span className="relative z-10">Conocer Más</span>
-                  <div className="absolute inset-0 bg-[#BCD7EA] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                </button>
+                {/* Overlay dinámico */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/40 transition-opacity duration-500"
+                  style={{
+                    opacity: contentFullyVisible ? 0.7 : showContent ? 0.5 : 0.2
+                  }}
+                />
+                
+                {/* Partículas flotantes */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-2 h-2 bg-[#00A3FF]/30 rounded-full animate-float"
+                      style={{
+                        left: `${20 + i * 15}%`,
+                        top: `${30 + (i % 3) * 20}%`,
+                        animationDelay: `${i * 0.8}s`,
+                        animationDuration: `${4 + i}s`,
+                        opacity: contentFullyVisible ? 1 : progress > 0.2 ? 0.5 : 0
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
               
-              {/* Indicadores de progreso */}
-              <div className="flex space-x-2 mt-8">
-                {customSections.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-500 ${
-                      i === idx 
-                        ? 'w-8 bg-[#00A3FF]' 
-                        : 'w-1 bg-[#BCD7EA]/50'
-                    }`}
-                    style={{ transitionDelay: `${0.8 + i * 0.1}s` }}
-                  />
-                ))}
+              {/* Contenido que aparece con scroll */}
+              <div 
+                className={`${isImageFixed ? 'fixed' : 'absolute'} inset-0 flex items-center justify-center`}
+                style={{
+                  zIndex: isImageFixed ? 20 : 5,
+                  opacity: contentOpacity,
+                  transform: `translateY(${contentTransform}px)`
+                }}
+              >
+                <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-24 lg:py-40 text-center lg:text-left">
+                  {/* Título */}
+                  <div className="relative overflow-hidden mb-8">
+                    <h2 
+                      className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4"
+                      style={{
+                        fontFamily: 'Utile, Arial, sans-serif',
+                        textShadow: '0 6px 40px rgba(0, 0, 0, 0.9), 0 2px 20px rgba(0, 0, 0, 0.8)',
+                        letterSpacing: '-1px',
+                        transform: showContent ? 'translateY(0)' : 'translateY(50px)',
+                        transition: 'transform 0.8s ease-out'
+                      }}
+                    >
+                      {section.title}
+                    </h2>
+                    
+                    {/* Línea decorativa */}
+                    <div 
+                      className="h-1 bg-gradient-to-r from-white to-transparent transition-all duration-1000"
+                      style={{
+                        width: showContent ? '96px' : '0px'
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Descripción */}
+                  <p 
+                    className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium max-w-4xl leading-relaxed mb-10"
+                    style={{
+                      fontFamily: 'Utile, Arial, sans-serif',
+                      textShadow: '0 4px 25px rgba(0, 0, 0, 0.9), 0 2px 15px rgba(0, 0, 0, 0.7)',
+                      transform: showContent ? 'translateY(0)' : 'translateY(30px)',
+                      transition: 'transform 0.8s ease-out 0.2s'
+                    }}
+                  >
+                    {section.content}
+                  </p>
+                  
+                  {/* Botones */}
+                  <div 
+                    className="flex flex-col sm:flex-row gap-4"
+                    style={{
+                      transform: showContent ? 'translateY(0)' : 'translateY(30px)',
+                      transition: 'transform 0.8s ease-out 0.4s'
+                    }}
+                  >
+                    <button 
+                      onClick={() => router.push(section.route)}
+                      className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        {section.buttonText}
+                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+                      </span>
+                      <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                    </button>
+                  </div>
+                  
+                  {/* Indicadores de progreso */}
+                  <div className="flex space-x-2 mt-8 justify-center lg:justify-start">
+                    {customSections.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1 rounded-full transition-all duration-500 ${
+                          i === idx 
+                            ? 'w-8 bg-white' 
+                            : 'w-1 bg-white/60'
+                        }`}
+                        style={{
+                          opacity: showContent ? 1 : 0,
+                          transform: showContent ? 'translateY(0)' : 'translateY(20px)',
+                          transition: `all 0.5s ease-out ${0.6 + i * 0.1}s`
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            {/* Efecto de brillo en hover */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-[#00A3FF]/20 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-1/3 right-1/3 w-24 h-24 bg-[#BCD7EA]/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
-            </div>
-          </section>
-        ))}
+              
+              {/* Espaciador invisible para scroll */}
+              <div style={{ height: '100vh' }} />
+            </section>
+          )
+        })}
       </main>
 
-      {/* FOOTER MINIMALISTA */}
+      {/* FOOTER */}
       <footer id="footer" className="relative z-10 bg-gradient-to-r from-[#0154AC] to-[#00A3FF] text-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -408,13 +424,13 @@ export default function HomePage() {
             
             <div className="flex items-center space-x-6">
               <div className="flex space-x-4">
-                <a href="#" className="text-white hover:text-[#BCD7EA] transition-colors">
+                <a href="https://www.linkedin.com/company/sirius-regenerative/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#BCD7EA] transition-colors">
                   <Linkedin size={20} />
                 </a>
-                <a href="#" className="text-white hover:text-[#BCD7EA] transition-colors">
-                  <Twitter size={20} />
+                <a href="https://www.facebook.com/share/1HBcfbuQ5f/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#BCD7EA] transition-colors">
+                  <Facebook size={20} />
                 </a>
-                <a href="#" className="text-white hover:text-[#BCD7EA] transition-colors">
+                <a href="https://www.instagram.com/sirius.colombia?igsh=ejhzaWI2MDQ2OTJj" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#BCD7EA] transition-colors">
                   <Instagram size={20} />
                 </a>
               </div>
@@ -524,20 +540,9 @@ export default function HomePage() {
           animation: glow 2s ease-in-out infinite;
         }
         
-        /* Responsive breakpoints */
         @media (max-width: 640px) {
           .container {
             padding: 0 1rem;
-          }
-        }
-        
-        @media (max-width: 768px) {
-          .snap-y {
-            scroll-snap-type: none;
-          }
-          
-          .snap-start {
-            scroll-snap-align: none;
           }
         }
       `}</style>
