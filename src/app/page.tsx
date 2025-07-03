@@ -36,6 +36,13 @@ export default function HomePage() {
   // Ref para el audio de fondo
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Ajustar el volumen del audio de fondo
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.030;
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
     
