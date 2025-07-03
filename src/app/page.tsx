@@ -152,7 +152,7 @@ export default function HomePage() {
     {
       id: 'dona-pepa',
       label: 'Doña Pepa',
-      image: '/DSC_3285.jpg',
+      image: '/DJI_0545.JPG',
       title: 'Doña Pepa',
       content: `Chatea con nuestro agente de inteligencia artificial a la vanguardia de la tecnología.`,
       apps: [
@@ -178,7 +178,7 @@ export default function HomePage() {
     {
       id: 'sirius-agentic',
       label: 'Sirius Agentic',
-      image: '/DSC_2889.jpg',
+      image: '/DJI_0909.jpg',
       title: 'Sirius Agentic',
       content: 'Sirius Agentic es nuestro agente de inteligencia artificial disponible en WhatsApp para ayudarte con tus consultas y necesidades empresariales.',
       apps: [
@@ -248,12 +248,13 @@ export default function HomePage() {
                   }
                   setIsMenuOpen(false)
                 }}
-                className={`text-[#BCD7EA] hover:text-[#00A3FF] px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base lg:text-lg font-bold transition-all duration-300 tracking-tight transform hover:scale-105 relative overflow-hidden shadow-none hover:shadow-lg hover:shadow-[#00A3FF]/40` + (activeSection === id ? ' text-[#00A3FF]' : '')}
+                className={`text-white hover:text-[#00A3FF] px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base lg:text-lg font-bold transition-all duration-300 tracking-tight transform hover:scale-105 relative overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/60 shadow-black/30 bg-black/60` + (activeSection === id ? ' text-[#00A3FF]' : '')}
                 style={{
                   fontFamily: 'Utile, Arial, sans-serif', 
                   letterSpacing: '-0.5px',
                   textShadow: activeSection === id ? '0 0 10px rgba(0, 163, 255, 0.5)' : '0 2px 4px rgba(0, 0, 0, 0.3)',
-                  background: 'transparent'
+                  background: 'rgba(0,0,0,0.6)', // fondo oscuro translúcido
+                  boxShadow: '0 4px 24px 0 rgba(0,0,0,0.35)',
                 }}
               >
                 <span className="relative z-10">{label}</span>
