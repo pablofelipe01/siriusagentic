@@ -122,7 +122,8 @@ export default function HomePage() {
         { text: 'AUTOMA (Financiero)', route: 'https://t.me/AUT0MA_bot' },
         { text: 'Solicitudes de compras', route: 'https://siriusadministrativo.s3.us-east-1.amazonaws.com/Formato+Solicitud+Compra+Adquisiciones.html' },
         { text: 'Proveedores', route: 'https://proveedores-gamma.vercel.app/' },
-        { text: 'Sirius Coins', route: 'https://airtable.com/app5o1BKy3divPinG/pagGWVLIk07fYaiuo/form' }
+        { text: 'Sirius Coins', route: 'https://airtable.com/app5o1BKy3divPinG/pagGWVLIk07fYaiuo/form' },
+        { text: 'Herramienta Financiera', route: 'https://airtable.com/appBNCVj4Njbyu1En/pagCTUfOvuQ4eOlxB' }
       ]
     },
     {
@@ -164,12 +165,22 @@ export default function HomePage() {
       content: `Alma es nuestro asistente conversacional institucional, capaz de responder preguntas, guiar procesos y facilitar el acceso al conocimiento interno de Sirius.`,
       buttonText: 'Usar Alma IA',
       route: '/chat'
+    },
+    {
+      id: 'sirius-agentic',
+      label: 'Sirius Agentic',
+      image: '/DSC_2889.jpg',
+      title: 'Sirius Agentic',
+      content: 'Sirius Agentic es nuestro agente de inteligencia artificial disponible en WhatsApp para ayudarte con tus consultas y necesidades empresariales.',
+      apps: [
+        { text: 'Chatear con Sirius Agentic', route: 'https://wa.me/573132121019?text=Hola%20Sirius%20Agentic!' }
+      ]
     }
   ]
 
   const navSections = [
     // Eliminado 'main-hero', ahora solo las secciones dinámicas
-    ...customSections.map(s => ({ id: s.id, label: s.label }))
+    ...customSections.filter(s => s.id !== 'about').map(s => ({ id: s.id, label: s.label }))
   ]
 
   const navbarOpacity = Math.min(scrollY / 100, 0.95)
@@ -208,17 +219,21 @@ export default function HomePage() {
               <button
                 key={id}
                 onClick={() => {
-                  if (id === 'main-hero') {
-                    const el = document.getElementById(id)
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  } else {
-                    handleNavigation(id)
+                  const el = document.getElementById(id)
+                  if (el) {
+                    // Scroll al título de la sección con animación suave
+                    const heading = el.querySelector('h2');
+                    const yOffset = -80;
+                    let targetY = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    if (heading) {
+                      targetY = (heading as HTMLElement).getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    }
+                    // Animación de scroll más suave
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
                   }
                   setIsMenuOpen(false)
                 }}
-                className={`text-[#BCD7EA] hover:text-[#00A3FF] px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base lg:text-lg font-bold transition-all duration-300 tracking-tight transform hover:scale-105 relative overflow-hidden ${
-                  activeSection === id ? 'text-[#00A3FF]' : ''
-                }`}
+                className={`text-[#BCD7EA] hover:text-[#00A3FF] px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base lg:text-lg font-bold transition-all duration-300 tracking-tight transform hover:scale-105 relative overflow-hidden shadow-none hover:shadow-lg hover:shadow-[#00A3FF]/40` + (activeSection === id ? ' text-[#00A3FF]' : '')}
                 style={{
                   fontFamily: 'Utile, Arial, sans-serif', 
                   letterSpacing: '-0.5px',
@@ -301,10 +316,11 @@ export default function HomePage() {
                       className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4"
                       style={{
                         fontFamily: 'Utile, Arial, sans-serif',
-                        textShadow: '0 6px 40px rgba(0, 0, 0, 0.9), 0 2px 20px rgba(0, 0, 0, 0.8)',
+                        // Sombra circular centrada y difusa
+                        textShadow: '0 0 80px 40px rgba(0,0,0,0.7), 0 0 160px 80px rgba(0,0,0,0.4)',
                         letterSpacing: '-1px',
                         transform: showContent ? 'translateY(0)' : 'translateY(50px)',
-                        transition: 'transform 0.8s ease-out'
+                        transition: 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)'
                       }}
                     >
                       {section.title}
