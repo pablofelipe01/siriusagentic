@@ -238,12 +238,12 @@ export default function HomePage() {
                   if (el) {
                     // Scroll al título de la sección con animación suave
                     const heading = el.querySelector('h2');
-                    const yOffset = -80;
+                    // Ajuste: desplazamiento mayor para que el contenido se vea bien
+                    const yOffset = -40; // Menos desplazamiento para que el contenido esté más visible
                     let targetY = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
                     if (heading) {
                       targetY = (heading as HTMLElement).getBoundingClientRect().top + window.pageYOffset + yOffset;
                     }
-                    // Animación de scroll más suave
                     window.scrollTo({ top: targetY, behavior: 'smooth' });
                   }
                   setIsMenuOpen(false)
@@ -285,7 +285,7 @@ export default function HomePage() {
               id={section.id}
               ref={el => { sectionsRef.current[idx] = el }}
               className="relative overflow-hidden"
-              style={{ height: '300vh' }}
+              style={{ height: '120vh' }} // Reducido para menos scroll
             >
               {/* Contenedor de imagen fija */}
               <div 
