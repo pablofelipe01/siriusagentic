@@ -238,12 +238,12 @@ export default function HomePage() {
                   if (el) {
                     // Scroll al título de la sección con animación suave
                     const heading = el.querySelector('h2');
-                    // Ajuste: desplazamiento mayor para que el contenido se vea bien
-                    const yOffset = -40; // Menos desplazamiento para que el contenido esté más visible
+                    const yOffset = -80;
                     let targetY = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
                     if (heading) {
                       targetY = (heading as HTMLElement).getBoundingClientRect().top + window.pageYOffset + yOffset;
                     }
+                    // Animación de scroll más suave
                     window.scrollTo({ top: targetY, behavior: 'smooth' });
                   }
                   setIsMenuOpen(false)
@@ -273,11 +273,16 @@ export default function HomePage() {
         {customSections.map((section, idx) => {
           const progress = sectionProgress[`section-${idx}`] || 0
           const isImageFixed = progress > 0.15 && progress < 0.85
-          const showContent = progress > 0.3
-          const contentFullyVisible = progress > 0.5 && progress < 0.8
+          const showContent = progress > 0.1 // Mostrar antes
+          const contentFullyVisible = progress > 0.2 // Más rápido
           const imageScale = Math.min(1.1, 1 + progress * 0.1)
-          const contentOpacity = progress < 0.3 ? 0 : progress > 0.7 ? 1 : Math.max(0, Math.min(1, (progress - 0.3) * 2.5))
-          const contentTransform = progress < 0.3 ? 50 : progress > 0.6 ? 0 : Math.max(0, (0.6 - progress) * 125)
+          // Si la sección fue navegada desde el navbar, forzar visibilidad total
+          const isNavTarget = activeSection === section.id
+          const contentOpacity = isNavTarget ? 1 : (progress < 0.1 ? 0 : progress > 0.5 ? 1 : Math.max(0, Math.min(1, (progress - 0.1) * 2.5)))
+          const contentTransform = isNavTarget ? 0 : (progress < 0.1 ? 50 : progress > 0.4 ? 0 : Math.max(0, (0.4 - progress) * 125))
+
+          // Primera sección: vacía al inicio
+          const hideFirstSection = idx === 0 && progress < 0.01 && !isNavTarget
 
           return (
             <section
@@ -285,7 +290,7 @@ export default function HomePage() {
               id={section.id}
               ref={el => { sectionsRef.current[idx] = el }}
               className="relative overflow-hidden"
-              style={{ height: '120vh' }} // Reducido para menos scroll
+              style={{ height: '120vh' }}
             >
               {/* Contenedor de imagen fija */}
               <div 
@@ -303,104 +308,99 @@ export default function HomePage() {
                     transform: `scale(${imageScale})`
                   }} 
                 />
-                
-                {/* Overlay dinámico */}
                 <div 
                   className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/40 transition-opacity duration-500"
                   style={{
                     opacity: contentFullyVisible ? 0.7 : showContent ? 0.5 : 0.2
                   }}
                 />
-                
-                {/* Partículas flotantes */}
-                {/* Eliminado: puntos azules animados */}
               </div>
-              
               {/* Contenido que aparece con scroll */}
-              <div 
-                className={`${isImageFixed ? 'fixed' : 'absolute'} inset-0 flex items-center justify-center`}
-                style={{
-                  zIndex: isImageFixed ? 20 : 5,
-                  opacity: contentOpacity,
-                  transform: `translateY(${contentTransform}px)`
-                }}
-              >
-                <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-24 lg:py-40 text-center lg:text-left">
-                  {/* Título */}
-                  <div className="relative overflow-hidden mb-8">
-                    <h2 
-                      className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4"
+              {!hideFirstSection && (
+                <div className={`${isImageFixed ? 'fixed' : 'absolute'} inset-0 flex items-center justify-center`}
+                  style={{
+                    zIndex: isImageFixed ? 20 : 5,
+                    opacity: contentOpacity,
+                    transform: `translateY(${contentTransform}px)`
+                  }}
+                >
+                  <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-24 lg:py-40 text-center lg:text-left">
+                    {/* Título */}
+                    <div className="relative overflow-hidden mb-8">
+                      <h2 
+                        className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4"
+                        style={{
+                          fontFamily: 'Utile, Arial, sans-serif',
+                          // Sombra circular centrada y difusa
+                          textShadow: '0 0 80px 40px rgba(0,0,0,0.7), 0 0 160px 80px rgba(0,0,0,0.4)',
+                          letterSpacing: '-1px',
+                          transform: showContent ? 'translateY(0)' : 'translateY(50px)',
+                          transition: 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)'
+                        }}
+                      >
+                        {section.title}
+                      </h2>
+                    </div>
+                    
+                    {/* Descripción */}
+                    <p 
+                      className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium max-w-4xl leading-relaxed mb-10"
                       style={{
                         fontFamily: 'Utile, Arial, sans-serif',
-                        // Sombra circular centrada y difusa
-                        textShadow: '0 0 80px 40px rgba(0,0,0,0.7), 0 0 160px 80px rgba(0,0,0,0.4)',
-                        letterSpacing: '-1px',
-                        transform: showContent ? 'translateY(0)' : 'translateY(50px)',
-                        transition: 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)'
-                      }}
-                    >
-                      {section.title}
-                    </h2>
-                  </div>
-                  
-                  {/* Descripción */}
-                  <p 
-                    className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium max-w-4xl leading-relaxed mb-10"
-                    style={{
-                      fontFamily: 'Utile, Arial, sans-serif',
-                      textShadow: '0 4px 25px rgba(0, 0, 0, 0.9), 0 2px 15px rgba(0, 0, 0, 0.7)',
-                      transform: showContent ? 'translateY(0)' : 'translateY(30px)',
-                      transition: 'transform 0.8s ease-out 0.2s'
-                    }}
-                  >
-                    {section.content}
-                  </p>
-                  {/* Botón o mensaje especial solo para la primera sección */}
-                  {idx === 0 ? (
-                    <div className="flex flex-col items-center justify-center mt-8">
-                      <span className="text-white text-lg sm:text-xl font-semibold animate-fade-in-up" style={{textShadow: '0 2px 10px rgba(0,0,0,0.5)'}}>Conocer más</span>
-                      <ChevronDown size={40} style={{marginTop: 8, color: '#00A3FF'}} className="animate-bounce" />
-                    </div>
-                  ) : section.apps ? (
-                    <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
-                      {section.apps.map(app => (
-                        <button
-                          key={app.text}
-                          onClick={() => { window.location.href = app.route; }}
-                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-6 py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden min-w-[180px] flex items-center justify-center"
-                        >
-                          <span className="relative z-10 flex items-center gap-2">
-                            {app.text}
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
-                          </span>
-                          <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div 
-                      className="flex flex-col sm:flex-row gap-4"
-                      style={{
+                        textShadow: '0 4px 25px rgba(0, 0, 0, 0.9), 0 2px 15px rgba(0, 0, 0, 0.7)',
                         transform: showContent ? 'translateY(0)' : 'translateY(30px)',
-                        transition: 'transform 0.8s ease-out 0.4s'
+                        transition: 'transform 0.8s ease-out 0.2s'
                       }}
                     >
-                      {section.route && section.buttonText && (
-                        <button 
-                          onClick={() => router.push(section.route!)}
-                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
-                        >
-                          <span className="relative z-10 flex items-center gap-2">
-                            {section.buttonText}
-                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
-                          </span>
-                          <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-                        </button>
-                      )}
-                    </div>
-                  )}
+                      {section.content}
+                    </p>
+                    {/* Botón o mensaje especial solo para la primera sección */}
+                    {idx === 0 ? (
+                      <div className="flex flex-col items-center justify-center mt-8">
+                        <span className="text-white text-lg sm:text-xl font-semibold animate-fade-in-up" style={{textShadow: '0 2px 10px rgba(0,0,0,0.5)'}}>Conocer más</span>
+                        <ChevronDown size={40} style={{marginTop: 8, color: '#00A3FF'}} className="animate-bounce" />
+                      </div>
+                    ) : section.apps ? (
+                      <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                        {section.apps.map(app => (
+                          <button
+                            key={app.text}
+                            onClick={() => { window.location.href = app.route; }}
+                            className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-6 py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden min-w-[180px] flex items-center justify-center"
+                          >
+                            <span className="relative z-10 flex items-center gap-2">
+                              {app.text}
+                              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                            </span>
+                            <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div 
+                        className="flex flex-col sm:flex-row gap-4"
+                        style={{
+                          transform: showContent ? 'translateY(0)' : 'translateY(30px)',
+                          transition: 'transform 0.8s ease-out 0.4s'
+                        }}
+                      >
+                        {section.route && section.buttonText && (
+                          <button 
+                            onClick={() => router.push(section.route!)}
+                            className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
+                          >
+                            <span className="relative z-10 flex items-center gap-2">
+                              {section.buttonText}
+                              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+                            </span>
+                            <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Espaciador invisible para scroll */}
               <div style={{ height: '100vh' }} />
