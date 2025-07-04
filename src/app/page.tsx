@@ -119,19 +119,14 @@ export default function HomePage() {
       setNavigatedSection(sectionId)
       const el = document.getElementById(sectionId)
       if (el) {
-        // Calcular la posición ideal para mostrar el contenido
+        // Scroll hasta el final de la sección (parte inferior de la sección alineada con parte inferior de la ventana)
         const sectionHeight = el.offsetHeight
-        const targetScroll = el.offsetTop + (sectionHeight * 0.4) // 40% del camino hacia abajo
-        
+        const windowHeight = window.innerHeight
+        const targetScroll = el.offsetTop + sectionHeight - windowHeight
         window.scrollTo({ 
           top: targetScroll, 
           behavior: 'smooth' 
         })
-        
-        // Limpiar el estado de navegación después de un tiempo
-        setTimeout(() => {
-          setNavigatedSection(null)
-        }, 2000)
       }
     }
     setIsMenuOpen(false)
@@ -362,7 +357,7 @@ export default function HomePage() {
                     style={{
                       fontFamily: 'Utile, Arial, sans-serif',
                       textShadow: '0 4px 25px rgba(0, 0, 0, 0.9), 0 2px 15px rgba(0, 0, 0, 0.7)',
-                      transform: showContent ? 'translateY(0)' : 'translateY(30px)',
+                      transform: showContent ? 'translateY(0)' : 'translateY(90px)',
                       transition: 'transform 0.8s ease-out 0.2s',
                       opacity: isNavigated ? 1 : undefined // Asegurar opacidad completa al navegar
                     }}
@@ -399,7 +394,7 @@ export default function HomePage() {
                     <div 
                       className="flex flex-col sm:flex-row gap-4"
                       style={{
-                        transform: showContent ? 'translateY(0)' : 'translateY(30px)',
+                        transform: showContent ? 'translateY(0)' : 'translateY(100px)',
                         transition: 'transform 0.8s ease-out 0.4s',
                         opacity: isNavigated ? 1 : undefined // Asegurar opacidad completa al navegar
                       }}
