@@ -378,9 +378,9 @@ export default function ChatPage() {
         </div>
 
         {/* Área de mensajes - Calculando el espacio disponible */}
-        <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-white/5 backdrop-blur-sm">
+        <div className="flex-grow overflow-y-auto p-4 space-y-4">
           {messages.length === 0 ? (
-            <div className="text-center text-white mt-10 bg-blue-900/30 p-6 rounded-xl border border-blue-500/20 shadow-lg">
+            <div className="text-center text-white mt-10 bg-black/40 p-6 rounded-xl border border-white/20 shadow-lg">
               <p>¡Bienvenido {userName}! Escribe un mensaje, graba un audio, envía una imagen o sube un documento PDF para comenzar la conversación.</p>
             </div>
           ) : (
