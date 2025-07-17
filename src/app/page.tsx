@@ -172,13 +172,14 @@ export default function HomePage() {
       ]
     },
     {
-      id: 'dona-pepa',
-      label: 'Doña Pepa',
+      id: 'guaicaramo',
+      label: 'Guaicaramo',
       image: '/DJI_0545.JPG',
-      title: 'Doña Pepa',
-      content: `Chatea con nuestro agente de inteligencia artificial a la vanguardia de la tecnología.`,
+      title: 'Guaicaramo',
+      content: `Accede a nuestros servicios de inteligencia artificial y gestión de pedidos.`,
       apps: [
-        { text: 'Chatear con Doña Pepa', route: 'https://wa.me/573132552326?text=Hola%20Doña%20Pepa!' }
+        { text: 'Doña Pepa', route: 'https://wa.me/573132552326?text=Hola%20Doña%20Pepa!' },
+        { text: 'Pedidos', route: 'https://pedidossirius.vercel.app/' }
       ]
     },
     {
