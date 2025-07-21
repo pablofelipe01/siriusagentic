@@ -151,7 +151,7 @@ export default function HomePage() {
       apps: [
         { text: 'Novedades de nómina', route: 'https://novedadesnomina.s3.us-east-1.amazonaws.com/Index_Novedades_Nomina.html' },
         { text: 'AUTOMA (Financiero)', route: 'https://t.me/AUT0MA_bot' },
-        { text: 'Solicitudes de compras', route: 'https://siriusadministrativo.s3.us-east-1.amazonaws.com/Formato+Solicitud+Compra+Adquisiciones.html' },
+        { text: 'Solicitudes de compras', route: 'https://sirius-financiero.vercel.app/' },
         { text: 'Proveedores', route: 'https://proveedores-gamma.vercel.app/' },
         { text: 'Sirius Coins', route: 'https://airtable.com/app5o1BKy3divPinG/pagGWVLIk07fYaiuo/form' },
         { text: 'Herramienta Financiera', route: 'https://airtable.com/appBNCVj4Njbyu1En/pagCTUfOvuQ4eOlxB' }
