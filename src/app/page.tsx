@@ -166,7 +166,7 @@ export default function HomePage() {
       content: `Soluciones tecnológicas avanzadas para la operación, automatización y análisis de datos en Sirius.`,
       apps: [
         { text: 'DAO', route: 'https://cliente-dao.vercel.app/' },
-        { text: 'DataLab', route: 'https://www.consultaia.app/' },
+        { text: 'DataLab', route: 'https://sirius-laboratorio.vercel.app/' },
         { text: 'LABI', route: 'https://t.me/L4BI_bot' },
         { text: 'Biogasbot', route: 'https://t.me/BioGasManager_bot' },
         { text: 'Pirolibot', route: 'https://t.me/PiroliBot_bot' }
