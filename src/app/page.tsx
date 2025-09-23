@@ -376,20 +376,28 @@ export default function HomePage() {
                   ) : section.apps ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 justify-items-center lg:justify-items-start">
                       {section.apps.map(app => (
-                        <button
-                          key={app.text}
-                          onClick={() => { window.location.href = app.route; }}
-                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden w-full max-w-[180px] sm:min-w-[160px] flex items-center justify-center text-sm sm:text-base"
-                          style={{
-                            opacity: isNavigated ? 1 : undefined // Asegurar opacidad completa al navegar
-                          }}
-                        >
-                          <span className="relative z-10 flex items-center gap-1 sm:gap-2 text-center">
-                            {app.text}
-                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
-                          </span>
-                          <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-                        </button>
+                        <div key={app.text} className="flex flex-col items-center gap-2">
+                          {app.text === 'Doña Pepa' && (
+                            <img
+                              src="/doñapepa_whatsapp_qr.png"
+                              alt="QR Code Doña Pepa WhatsApp"
+                              className="w-24 h-24 sm:w-32 sm:h-32 object-contain rounded-lg shadow-lg"
+                            />
+                          )}
+                          <button
+                            onClick={() => { window.location.href = app.route; }}
+                            className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden w-full max-w-[180px] sm:min-w-[160px] flex items-center justify-center text-sm sm:text-base"
+                            style={{
+                              opacity: isNavigated ? 1 : undefined // Asegurar opacidad completa al navegar
+                            }}
+                          >
+                            <span className="relative z-10 flex items-center gap-1 sm:gap-2 text-center">
+                              {app.text}
+                              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
+                            </span>
+                            <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   ) : (
