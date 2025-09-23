@@ -334,7 +334,7 @@ export default function HomePage() {
                   transform: `translateY(${contentTransform}px)`
                 }}
               >
-                <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-24 lg:py-40 text-center lg:text-left">
+                <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-16 py-16 sm:py-24 lg:py-40 text-center lg:text-left">
                   {/* Título */}
                   <div className="relative overflow-hidden mb-8">
                     <h2 
@@ -374,19 +374,19 @@ export default function HomePage() {
                       <ChevronDown size={40} style={{marginTop: 8, color: '#00A3FF'}} className="animate-bounce" />
                     </div>
                   ) : section.apps ? (
-                    <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 justify-items-center lg:justify-items-start">
                       {section.apps.map(app => (
                         <button
                           key={app.text}
                           onClick={() => { window.location.href = app.route; }}
-                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-6 py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden min-w-[180px] flex items-center justify-center"
+                          className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden w-full max-w-[180px] sm:min-w-[160px] flex items-center justify-center text-sm sm:text-base"
                           style={{
                             opacity: isNavigated ? 1 : undefined // Asegurar opacidad completa al navegar
                           }}
                         >
-                          <span className="relative z-10 flex items-center gap-2">
+                          <span className="relative z-10 flex items-center gap-1 sm:gap-2 text-center">
                             {app.text}
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
                           </span>
                           <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
                         </button>
