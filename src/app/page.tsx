@@ -196,8 +196,10 @@ export default function HomePage() {
       image: '/DSC_3197.jpg',
       title: 'Alma: Asistente IA',
       content: `Alma es nuestro asistente conversacional institucional, capaz de responder preguntas, guiar procesos y facilitar el acceso al conocimiento interno de Sirius.`,
-      buttonText: 'Usar Alma IA',
-      route: '/chat'
+      apps: [
+        { text: 'Usar Alma IA', route: '/chat' },
+        { text: 'Alma 2', route: 'https://fedepalma-bot.vercel.app/' }
+      ]
     },
     {
       id: 'sirius-agentic',
