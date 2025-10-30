@@ -169,7 +169,7 @@ export default function HomePage() {
         { text: 'DataLab', route: 'https://sirius-laboratorio.vercel.app/' },
         { text: 'LABI', route: 'https://t.me/L4BI_bot' },
         { text: 'Biogasbot', route: 'https://t.me/BioGasManager_bot' },
-        { text: 'Pirolibot', route: 'https://t.me/PiroliBot_bot' }
+        { text: 'PiroliApp', route: 'https://sirius-pirolisis.vercel.app/' }
       ]
     },
     {
