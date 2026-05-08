@@ -7,23 +7,22 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { cedula, password } = body as { cedula?: string; password?: string };
 
-    if (!cedula || !password) {
+    if (!cedula) {
       return NextResponse.json(
-        { success: false, error: 'Cédula y contraseña son requeridas' },
+        { success: false, error: 'La cédula es requerida' },
         { status: 400 }
       );
     }
 
-    const token   = process.env.AIRTABLE_API_KEY_SIRIUS_NOMINA_CORE_TOKEN;
-    const baseId  = process.env.AIRTABLE_BASE_ID_SIRIUS_NOMINA_CORE;
-    const tableId = process.env.AIRTABLE_PERSONAL_TABLE_ID;
-
-    // Field IDs de la tabla Personal
+    const token      = process.env.AIRTABLE_API_KEY_SIRIUS_NOMINA_CORE_TOKEN;
+    const baseId     = process.env.AIRTABLE_BASE_ID_SIRIUS_NOMINA_CORE;
+    const tableId    = process.env.AIRTABLE_PERSONAL_TABLE_ID;
     const fDocumento = process.env.AIRTABLE_PF_NUMERO_DOCUMENTO;
     const fPassword  = process.env.AIRTABLE_PF_PASSWORD;
     const fNombre    = process.env.AIRTABLE_PF_NOMBRE_COMPLETO;
+    const fEstado    = process.env.AIRTABLE_PF_ESTADO_ACTIVIDAD;
 
-    if (!token || !baseId || !tableId || !fDocumento || !fPassword || !fNombre) {
+    if (!token || !baseId || !tableId || !fDocumento || !fPassword || !fNombre || !fEstado) {
       console.error('Variables de entorno faltantes para mediaAuth');
       return NextResponse.json(
         { success: false, error: 'Configuración incompleta del servidor' },
@@ -31,10 +30,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Filtrar por número de documento usando field ID
     const safeCode = cedula.replace(/['"\\]/g, '');
     const filter = encodeURIComponent(`{${fDocumento}} = "${safeCode}"`);
-    const fieldParams = [fDocumento, fPassword, fNombre]
+    const fieldParams = [fDocumento, fPassword, fNombre, fEstado]
       .map(f => `fields%5B%5D=${encodeURIComponent(f)}`)
       .join('&');
 
@@ -54,26 +52,47 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = await res.json() as { records: { fields: Record<string, string> }[] };
+    const data = await res.json() as { records: { id: string; fields: Record<string, string> }[] };
 
+    // Usuario no encontrado
     if (!data.records || data.records.length === 0) {
+      if (!password) return NextResponse.json({ found: false });
+      return NextResponse.json({ success: false, error: 'Cédula o contraseña incorrecta' }, { status: 401 });
+    }
+
+    const fieldsData  = data.records[0].fields;
+    const estadoValue = (fieldsData[fEstado] ?? '').toLowerCase();
+    const active      = estadoValue !== 'inactivo';
+    const hasPassword = !!fieldsData[fPassword];
+    const nombre      = fieldsData[fNombre] || cedula;
+
+    // ── Modo verificación (sin contraseña) ──────────────────────────
+    if (!password) {
+      return NextResponse.json({ found: true, active, hasPassword, nombre });
+    }
+
+    // ── Modo autenticación completa ──────────────────────────────────
+    if (!active) {
+      return NextResponse.json(
+        { success: false, error: 'Tu cuenta está inactiva. Contacta al área de Recursos Humanos.' },
+        { status: 403 }
+      );
+    }
+
+    if (!hasPassword) {
+      return NextResponse.json(
+        { success: false, error: 'Debes crear tu contraseña primero.' },
+        { status: 403 }
+      );
+    }
+
+    const valid = await bcrypt.compare(password, fieldsData[fPassword]);
+    if (!valid) {
       return NextResponse.json(
         { success: false, error: 'Cédula o contraseña incorrecta' },
         { status: 401 }
       );
     }
-
-    const fields_data = data.records[0].fields;
-    const storedPassword = fields_data[fPassword];
-
-    if (!storedPassword || !(await bcrypt.compare(password, storedPassword))) {
-      return NextResponse.json(
-        { success: false, error: 'Cédula o contraseña incorrecta' },
-        { status: 401 }
-      );
-    }
-
-    const nombre = fields_data[fNombre] || cedula;
 
     return NextResponse.json({ success: true, nombre });
   } catch (error) {

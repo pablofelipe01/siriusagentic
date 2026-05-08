@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield, Mail, Phone, MapPin, Linkedin, Facebook, Instagram } from 'lucide-react'
+import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, User, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield, Mail, Phone, MapPin, Linkedin, Facebook, Instagram } from 'lucide-react'
 import NavHeader from '@/components/ui/nav-header'
 
 // Tipos para las apps y secciones
@@ -36,6 +36,10 @@ export default function HomePage() {
   const [loginForm, setLoginForm] = useState({ cedula: '', password: '' })
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
+  const [loginStep, setLoginStep] = useState<'cedula' | 'password' | 'new-password'>('cedula')
+  const [loginNombre, setLoginNombre] = useState('')
+  const [loginNewPass, setLoginNewPass] = useState('')
+  const [loginConfirmPass, setLoginConfirmPass] = useState('')
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const headerRef = useRef<HTMLElement | null>(null)
   const sectionsRef = useRef<(HTMLElement | null)[]>([])
@@ -451,7 +455,7 @@ export default function HomePage() {
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           style={{ background: 'rgba(0,8,20,0.85)', backdropFilter: 'blur(12px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) { setIsLoginModalOpen(false); setLoginError('') } }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setIsLoginModalOpen(false); setLoginError(''); setLoginStep('cedula'); setLoginNombre(''); setLoginForm({ cedula: '', password: '' }); setLoginNewPass(''); setLoginConfirmPass('') } }}
         >
           <div
             className="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-fade-in-up"
@@ -481,7 +485,7 @@ export default function HomePage() {
                 </div>
               </div>
               <button
-                onClick={() => { setIsLoginModalOpen(false); setLoginError('') }}
+                onClick={() => { setIsLoginModalOpen(false); setLoginError(''); setLoginStep('cedula'); setLoginNombre(''); setLoginForm({ cedula: '', password: '' }); setLoginNewPass(''); setLoginConfirmPass('') }}
                 className="text-[#4A7FA5] hover:text-white transition-all duration-200 p-2 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10"
               >
                 <X size={18} />
@@ -491,7 +495,7 @@ export default function HomePage() {
             {/* Divisor */}
             <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#00A3FF]/25 to-transparent" />
 
-            {/* Formulario */}
+            {/* Formulario multi-paso */}
             <form
               className="px-8 pt-6 pb-8 flex flex-col gap-4"
               onSubmit={async (e) => {
@@ -499,18 +503,65 @@ export default function HomePage() {
                 setLoginError('')
                 setLoginLoading(true)
                 try {
-                  const res = await fetch('/api/mediaAuth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cedula: loginForm.cedula, password: loginForm.password }),
-                  })
-                  const data = await res.json()
-                  if (data.success) {
-                    setIsLoginModalOpen(false)
-                    setLoginForm({ cedula: '', password: '' })
-                    router.push('/media')
+                  // ── Paso 1: verificar cédula ─────────────────────────────
+                  if (loginStep === 'cedula') {
+                    const res = await fetch('/api/mediaAuth', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ cedula: loginForm.cedula }),
+                    })
+                    const data = await res.json()
+                    if (!data.found) {
+                      setLoginError('No se encontró ningún empleado con ese número de documento.')
+                    } else if (!data.active) {
+                      setLoginError('Tu cuenta está inactiva. Contacta al área de Recursos Humanos.')
+                    } else {
+                      setLoginNombre(data.nombre)
+                      setLoginStep(data.hasPassword ? 'password' : 'new-password')
+                    }
+
+                  // ── Paso 2a: autenticar con contraseña ───────────────────
+                  } else if (loginStep === 'password') {
+                    const res = await fetch('/api/mediaAuth', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ cedula: loginForm.cedula, password: loginForm.password }),
+                    })
+                    const data = await res.json()
+                    if (data.success) {
+                      setIsLoginModalOpen(false)
+                      setLoginStep('cedula'); setLoginNombre('')
+                      setLoginForm({ cedula: '', password: '' })
+                      router.push('/media')
+                    } else {
+                      setLoginError(data.error || 'Credenciales incorrectas')
+                    }
+
+                  // ── Paso 2b: crear nueva contraseña ──────────────────────
                   } else {
-                    setLoginError(data.error || 'Credenciales incorrectas')
+                    if (loginNewPass.length < 8) {
+                      setLoginError('La contraseña debe tener al menos 8 caracteres.')
+                      return
+                    }
+                    if (loginNewPass !== loginConfirmPass) {
+                      setLoginError('Las contraseñas no coinciden.')
+                      return
+                    }
+                    const res = await fetch('/api/mediaSetPassword', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ cedula: loginForm.cedula, newPassword: loginNewPass }),
+                    })
+                    const data = await res.json()
+                    if (data.success) {
+                      setIsLoginModalOpen(false)
+                      setLoginStep('cedula'); setLoginNombre('')
+                      setLoginForm({ cedula: '', password: '' })
+                      setLoginNewPass(''); setLoginConfirmPass('')
+                      router.push('/media')
+                    } else {
+                      setLoginError(data.error || 'Error al crear la contraseña.')
+                    }
                   }
                 } catch {
                   setLoginError('Error de conexión. Intenta de nuevo.')
@@ -519,48 +570,134 @@ export default function HomePage() {
                 }
               }}
             >
-              {/* Cédula */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
-                  Número de cédula
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Ej: 1234567890"
-                  value={loginForm.cedula}
-                  onChange={(e) => setLoginForm(f => ({ ...f, cedula: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
-                  style={{
-                    background: 'rgba(0,163,255,0.05)',
-                    border: '1.5px solid rgba(0,163,255,0.15)',
-                    fontFamily: 'Utile, Arial, sans-serif',
-                  }}
-                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
-                />
-              </div>
+              {/* ── STEP cedula ─────────────────────────────────────────── */}
+              {loginStep === 'cedula' && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                    Número de cédula
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Ej: 1234567890"
+                    value={loginForm.cedula}
+                    onChange={(e) => setLoginForm(f => ({ ...f, cedula: e.target.value }))}
+                    autoFocus
+                    className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
+                    style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
+                  />
+                </div>
+              )}
 
-              {/* Contraseña */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm(f => ({ ...f, password: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
-                  style={{
-                    background: 'rgba(0,163,255,0.05)',
-                    border: '1.5px solid rgba(0,163,255,0.15)',
-                    fontFamily: 'Utile, Arial, sans-serif',
-                  }}
-                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
-                />
-              </div>
+              {/* ── STEP password ───────────────────────────────────────── */}
+              {loginStep === 'password' && (
+                <>
+                  {/* Tarjeta de usuario */}
+                  <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.12)' }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #00A3FF, #0154AC)' }}>
+                      <User size={15} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs font-semibold truncate" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>{loginNombre}</p>
+                      <p className="text-[#4A7FA5] text-[10px]">Cédula: {loginForm.cedula}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setLoginStep('cedula'); setLoginError(''); setLoginForm(f => ({ ...f, password: '' })) }}
+                      className="text-[#4A7FA5] hover:text-white text-[10px] transition-colors px-2 py-1 rounded-lg hover:bg-white/10"
+                      style={{ fontFamily: 'Utile, Arial, sans-serif' }}
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                      Contraseña
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm(f => ({ ...f, password: e.target.value }))}
+                      autoFocus
+                      className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
+                      style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* ── STEP new-password ────────────────────────────────────── */}
+              {loginStep === 'new-password' && (
+                <>
+                  {/* Aviso informativo */}
+                  <div className="px-4 py-3 rounded-xl" style={{ background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.15)' }}>
+                    <p className="text-white text-xs font-semibold mb-0.5" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                      Hola {loginNombre}, crea tu contraseña de acceso
+                    </p>
+                    <p className="text-[#4A7FA5] text-[10px]" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                      Es tu primer acceso o tu contraseña fue reiniciada por un administrador.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Nueva contraseña</label>
+                    <input
+                      type="password"
+                      placeholder="Mínimo 8 caracteres"
+                      value={loginNewPass}
+                      onChange={(e) => setLoginNewPass(e.target.value)}
+                      autoFocus
+                      className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
+                      style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Confirmar contraseña</label>
+                    <input
+                      type="password"
+                      placeholder="Repite la contraseña"
+                      value={loginConfirmPass}
+                      onChange={(e) => setLoginConfirmPass(e.target.value)}
+                      className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
+                      style={{
+                        background: 'rgba(0,163,255,0.05)',
+                        border: loginConfirmPass
+                          ? loginNewPass !== loginConfirmPass
+                            ? '1.5px solid rgba(239,68,68,0.5)'
+                            : '1.5px solid rgba(34,197,94,0.5)'
+                          : '1.5px solid rgba(0,163,255,0.15)',
+                        fontFamily: 'Utile, Arial, sans-serif',
+                      }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+                      onBlur={e => { e.currentTarget.style.background = 'rgba(0,163,255,0.05)'; e.currentTarget.style.borderColor = loginConfirmPass ? loginNewPass !== loginConfirmPass ? 'rgba(239,68,68,0.5)' : 'rgba(34,197,94,0.5)' : 'rgba(0,163,255,0.15)' }}
+                    />
+                  </div>
+
+                  {/* Indicador de fortaleza */}
+                  {loginNewPass.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="h-1 flex-1 rounded-full transition-all duration-300"
+                          style={{ background: i < Math.min(Math.floor(loginNewPass.length / 3), 4) ? loginNewPass.length >= 12 ? '#22C55E' : loginNewPass.length >= 8 ? '#00A3FF' : '#F59E0B' : 'rgba(255,255,255,0.1)' }}
+                        />
+                      ))}
+                      <span className="text-[10px] ml-1" style={{ color: loginNewPass.length >= 12 ? '#22C55E' : loginNewPass.length >= 8 ? '#00A3FF' : '#F59E0B', fontFamily: 'Utile, Arial, sans-serif' }}>
+                        {loginNewPass.length >= 12 ? 'Fuerte' : loginNewPass.length >= 8 ? 'Aceptable' : 'Débil'}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* Error */}
               {loginError && (
@@ -575,11 +712,7 @@ export default function HomePage() {
                 type="submit"
                 disabled={loginLoading}
                 className="group relative mt-1 w-full text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-500 transform hover:scale-[1.02] hover:shadow-2xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                style={{
-                  background: 'linear-gradient(135deg, #00A3FF 0%, #0154AC 100%)',
-                  fontFamily: 'Utile, Arial, sans-serif',
-                  boxShadow: '0 4px 24px rgba(0,163,255,0.3)',
-                }}
+                style={{ background: 'linear-gradient(135deg, #00A3FF 0%, #0154AC 100%)', fontFamily: 'Utile, Arial, sans-serif', boxShadow: '0 4px 24px rgba(0,163,255,0.3)' }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {loginLoading ? (
@@ -588,11 +721,11 @@ export default function HomePage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Verificando...
+                      {loginStep === 'new-password' ? 'Guardando...' : 'Verificando...'}
                     </>
                   ) : (
                     <>
-                      Ingresar a Sirius Media
+                      {loginStep === 'cedula' ? 'Continuar' : loginStep === 'password' ? 'Ingresar a Sirius Media' : 'Crear contraseña'}
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
                     </>
                   )}
