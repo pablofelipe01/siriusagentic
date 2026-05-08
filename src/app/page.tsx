@@ -505,6 +505,17 @@ export default function HomePage() {
                 try {
                   // ── Paso 1: verificar cédula ─────────────────────────────
                   if (loginStep === 'cedula') {
+                    const cedulaDigits = loginForm.cedula.replace(/\D/g, '')
+                    if (cedulaDigits.length < 6) {
+                      setLoginError('La cédula debe tener al menos 6 dígitos.')
+                      setLoginLoading(false)
+                      return
+                    }
+                    if (cedulaDigits.length > 10) {
+                      setLoginError('La cédula no puede tener más de 10 dígitos.')
+                      setLoginLoading(false)
+                      return
+                    }
                     const res = await fetch('/api/mediaAuth', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -522,6 +533,11 @@ export default function HomePage() {
 
                   // ── Paso 2a: autenticar con contraseña ───────────────────
                   } else if (loginStep === 'password') {
+                    if (loginForm.password.length < 8) {
+                      setLoginError('La contraseña debe tener al menos 8 caracteres.')
+                      setLoginLoading(false)
+                      return
+                    }
                     const res = await fetch('/api/mediaAuth', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
