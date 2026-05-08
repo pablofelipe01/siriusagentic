@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Book, Bot, Briefcase, ExternalLink, MessageCircle, Users, AlertCircle, Menu, X, ChevronDown, Star, Zap, Shield, Mail, Phone, MapPin, Linkedin, Facebook, Instagram } from 'lucide-react'
+import NavHeader from '@/components/ui/nav-header'
 
 // Tipos para las apps y secciones
 interface AdminApp {
@@ -31,6 +32,8 @@ export default function HomePage() {
   const [sectionProgress, setSectionProgress] = useState<Record<string, number>>({})
   const [currentSection, setCurrentSection] = useState(0)
   const [navigatedSection, setNavigatedSection] = useState<string | null>(null) // Nueva state para tracking de navegación
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [loginForm, setLoginForm] = useState({ cedula: '', password: '' })
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const headerRef = useRef<HTMLElement | null>(null)
   const sectionsRef = useRef<(HTMLElement | null)[]>([])
@@ -185,10 +188,10 @@ export default function HomePage() {
       ]
     },
     {
-      id: 'reuniones',
-      label: 'Reuniones',
+      id: 'sirius-media',
+      label: 'Sirius Media',
       image: '/DSC_3239.jpg',
-      title: 'Reuniones',
+      title: 'Sirius Media',
       content: `Accede a la gestión y programación de reuniones institucionales de Sirius.`,
     },
     {
@@ -256,26 +259,12 @@ export default function HomePage() {
             </button>
           </div>
           
-          <nav className={`${isMenuOpen ? 'flex' : 'hidden'} lg:flex flex-col lg:flex-row items-center gap-2 lg:gap-4 xl:gap-6 w-full lg:w-auto transition-all duration-300`}>
-            {navSections.map(({ id, label }, index) => (
-              <button
-                key={id}
-                onClick={() => handleSectionNavigation(id)}
-                className={`text-white hover:text-[#00A3FF] px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base lg:text-lg font-bold transition-all duration-300 tracking-tight transform hover:scale-105 relative overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/60 shadow-black/30 bg-black/60` + (activeSection === id ? ' text-[#00A3FF]' : '')}
-                style={{
-                  fontFamily: 'Utile, Arial, sans-serif', 
-                  letterSpacing: '-0.5px',
-                  textShadow: activeSection === id ? '0 0 10px rgba(0, 163, 255, 0.5)' : '0 2px 4px rgba(0, 0, 0, 0.3)',
-                  background: 'rgba(0,0,0,0.6)', // fondo oscuro translúcido
-                  boxShadow: '0 4px 24px 0 rgba(0,0,0,0.35)',
-                }}
-              >
-                <span className="relative z-10">{label}</span>
-                {activeSection === id && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-20 animate-pulse" />
-                )}
-              </button>
-            ))}
+          <nav className={`${isMenuOpen ? 'flex' : 'hidden'} lg:flex items-center w-full lg:w-auto transition-all duration-300`}>
+            <NavHeader
+              sections={navSections}
+              activeSection={activeSection}
+              onNavigate={(id) => { handleSectionNavigation(id); setIsMenuOpen(false); }}
+            />
           </nav>
         </div>
       </header>
@@ -403,6 +392,25 @@ export default function HomePage() {
                         </div>
                       ))}
                     </div>
+                  ) : section.id === 'sirius-media' ? (
+                    <div
+                      style={{
+                        transform: showContent ? 'translateY(0)' : 'translateY(100px)',
+                        transition: 'transform 0.8s ease-out 0.4s',
+                        opacity: isNavigated ? 1 : undefined
+                      }}
+                    >
+                      <button
+                        onClick={() => setIsLoginModalOpen(true)}
+                        className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Iniciar sesión
+                          <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+                        </span>
+                        <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                      </button>
+                    </div>
                   ) : (
                     <div 
                       className="flex flex-col sm:flex-row gap-4"
@@ -435,6 +443,98 @@ export default function HomePage() {
           )
         })}
       </main>
+
+      {/* Modal de inicio de sesión - Sirius Media */}
+      {isLoginModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setIsLoginModalOpen(false) }}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+            style={{ background: 'rgba(10,18,36,0.97)', border: '1px solid rgba(0,163,255,0.25)' }}
+          >
+            {/* Header del modal */}
+            <div className="flex items-center justify-between px-8 pt-8 pb-4">
+              <div>
+                <h2 className="text-white text-2xl font-black" style={{ fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-0.5px' }}>
+                  Sirius Media
+                </h2>
+                <p className="text-[#8BA5C2] text-sm mt-1">Ingresa tus credenciales para continuar</p>
+              </div>
+              <button
+                onClick={() => setIsLoginModalOpen(false)}
+                className="text-[#8BA5C2] hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* Divisor */}
+            <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#00A3FF]/40 to-transparent mb-6" />
+
+            {/* Formulario */}
+            <form
+              className="px-8 pb-8 flex flex-col gap-5"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <div className="flex flex-col gap-2">
+                <label className="text-[#BCD7EA] text-sm font-semibold" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                  Cédula
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Ej: 1234567890"
+                  value={loginForm.cedula}
+                  onChange={(e) => setLoginForm(f => ({ ...f, cedula: e.target.value }))}
+                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#4A6B8A] text-base font-medium outline-none transition-all duration-200"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1.5px solid rgba(0,163,255,0.2)',
+                    fontFamily: 'Utile, Arial, sans-serif',
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.7)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.2)')}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[#BCD7EA] text-sm font-semibold" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm(f => ({ ...f, password: e.target.value }))}
+                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#4A6B8A] text-base font-medium outline-none transition-all duration-200"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1.5px solid rgba(0,163,255,0.2)',
+                    fontFamily: 'Utile, Arial, sans-serif',
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.7)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.2)')}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="group relative mt-2 w-full bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white py-3 rounded-xl font-bold text-base transition-all duration-500 transform hover:scale-[1.02] hover:shadow-xl overflow-hidden"
+                style={{ fontFamily: 'Utile, Arial, sans-serif' }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Ingresar
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+                <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         * {
