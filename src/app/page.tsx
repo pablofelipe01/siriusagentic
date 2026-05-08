@@ -407,11 +407,11 @@ export default function HomePage() {
                       }}
                     >
                       <button
-                        onClick={() => setIsLoginModalOpen(true)}
+                        onClick={() => router.push('/media')}
                         className="group relative bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white px-8 py-4 rounded-xl font-bold transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
                       >
                         <span className="relative z-10 flex items-center gap-2">
-                          Iniciar sesión
+                          Acceder
                           <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
                         </span>
                         <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
@@ -451,7 +451,8 @@ export default function HomePage() {
       </main>
 
       {/* Modal de inicio de sesión - Sirius Media */}
-      {isLoginModalOpen && (
+      {/* LOGIN MODAL — desactivado temporalmente. El botón "Acceder" redirige directo a /media. */}
+      {false && isLoginModalOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           style={{ background: 'rgba(0,8,20,0.85)', backdropFilter: 'blur(12px)' }}
