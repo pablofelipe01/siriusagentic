@@ -34,6 +34,8 @@ export default function HomePage() {
   const [navigatedSection, setNavigatedSection] = useState<string | null>(null) // Nueva state para tracking de navegación
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [loginForm, setLoginForm] = useState({ cedula: '', password: '' })
+  const [loginError, setLoginError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const headerRef = useRef<HTMLElement | null>(null)
   const sectionsRef = useRef<(HTMLElement | null)[]>([])
@@ -192,7 +194,7 @@ export default function HomePage() {
       label: 'Sirius Media',
       image: '/DSC_3239.jpg',
       title: 'Sirius Media',
-      content: `Accede a la gestión y programación de reuniones institucionales de Sirius.`,
+      content: `Gestiona el archivo multimedia institucional de Sirius. Sube, organiza y consulta fotos y videos por área (pirolisis, laboratorio, SG-SST y más) con asistencia de inteligencia artificial.`,
     },
     {
       id: 'alma',
@@ -449,7 +451,7 @@ export default function HomePage() {
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setIsLoginModalOpen(false) }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setIsLoginModalOpen(false); setLoginError('') } }}
         >
           <div
             className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
@@ -464,7 +466,7 @@ export default function HomePage() {
                 <p className="text-[#8BA5C2] text-sm mt-1">Ingresa tus credenciales para continuar</p>
               </div>
               <button
-                onClick={() => setIsLoginModalOpen(false)}
+                onClick={() => { setIsLoginModalOpen(false); setLoginError('') }}
                 className="text-[#8BA5C2] hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
               >
                 <X size={22} />
@@ -477,7 +479,30 @@ export default function HomePage() {
             {/* Formulario */}
             <form
               className="px-8 pb-8 flex flex-col gap-5"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={async (e) => {
+                e.preventDefault()
+                setLoginError('')
+                setLoginLoading(true)
+                try {
+                  const res = await fetch('/api/mediaAuth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cedula: loginForm.cedula, password: loginForm.password }),
+                  })
+                  const data = await res.json()
+                  if (data.success) {
+                    setIsLoginModalOpen(false)
+                    setLoginForm({ cedula: '', password: '' })
+                    router.push('/media')
+                  } else {
+                    setLoginError(data.error || 'Credenciales incorrectas')
+                  }
+                } catch {
+                  setLoginError('Error de conexión. Intenta de nuevo.')
+                } finally {
+                  setLoginLoading(false)
+                }
+              }}
             >
               <div className="flex flex-col gap-2">
                 <label className="text-[#BCD7EA] text-sm font-semibold" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
@@ -520,14 +545,34 @@ export default function HomePage() {
                 />
               </div>
 
+              {loginError && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,60,60,0.12)', border: '1px solid rgba(255,60,60,0.3)' }}>
+                  <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
+                  <p className="text-red-400 text-sm font-medium" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>{loginError}</p>
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="group relative mt-2 w-full bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white py-3 rounded-xl font-bold text-base transition-all duration-500 transform hover:scale-[1.02] hover:shadow-xl overflow-hidden"
+                disabled={loginLoading}
+                className="group relative mt-2 w-full bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white py-3 rounded-xl font-bold text-base transition-all duration-500 transform hover:scale-[1.02] hover:shadow-xl overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
                 style={{ fontFamily: 'Utile, Arial, sans-serif' }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  Ingresar
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                  {loginLoading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Verificando...
+                    </>
+                  ) : (
+                    <>
+                      Ingresar
+                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                    </>
+                  )}
                 </span>
                 <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
               </button>
