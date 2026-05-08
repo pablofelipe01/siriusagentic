@@ -450,35 +450,50 @@ export default function HomePage() {
       {isLoginModalOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          style={{ background: 'rgba(0,8,20,0.85)', backdropFilter: 'blur(12px)' }}
           onClick={(e) => { if (e.target === e.currentTarget) { setIsLoginModalOpen(false); setLoginError('') } }}
         >
           <div
-            className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: 'rgba(10,18,36,0.97)', border: '1px solid rgba(0,163,255,0.25)' }}
+            className="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-fade-in-up"
+            style={{
+              background: 'linear-gradient(145deg, rgba(10,18,36,0.98) 0%, rgba(1,29,61,0.98) 100%)',
+              border: '1px solid rgba(0,163,255,0.2)',
+              boxShadow: '0 0 60px rgba(0,163,255,0.08), 0 32px 64px rgba(0,0,0,0.5)',
+            }}
           >
-            {/* Header del modal */}
-            <div className="flex items-center justify-between px-8 pt-8 pb-4">
-              <div>
-                <h2 className="text-white text-2xl font-black" style={{ fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-0.5px' }}>
-                  Sirius Media
-                </h2>
-                <p className="text-[#8BA5C2] text-sm mt-1">Ingresa tus credenciales para continuar</p>
+            {/* Franja de acento superior */}
+            <div className="h-1 w-full bg-gradient-to-r from-[#00A3FF] via-[#0154AC] to-[#00A3FF]" />
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 pt-7 pb-5">
+              <div className="flex items-center gap-3">
+                {/* Icono */}
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00A3FF]/20 to-[#0154AC]/20 border border-[#00A3FF]/25 flex items-center justify-center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A3FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.9L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-white text-xl font-black leading-none" style={{ fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-0.5px' }}>
+                    Sirius Media
+                  </h2>
+                  <p className="text-[#4A7FA5] text-xs mt-0.5" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Archivo multimedia institucional</p>
+                </div>
               </div>
               <button
                 onClick={() => { setIsLoginModalOpen(false); setLoginError('') }}
-                className="text-[#8BA5C2] hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+                className="text-[#4A7FA5] hover:text-white transition-all duration-200 p-2 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10"
               >
-                <X size={22} />
+                <X size={18} />
               </button>
             </div>
 
             {/* Divisor */}
-            <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#00A3FF]/40 to-transparent mb-6" />
+            <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#00A3FF]/25 to-transparent" />
 
             {/* Formulario */}
             <form
-              className="px-8 pb-8 flex flex-col gap-5"
+              className="px-8 pt-6 pb-8 flex flex-col gap-4"
               onSubmit={async (e) => {
                 e.preventDefault()
                 setLoginError('')
@@ -504,9 +519,10 @@ export default function HomePage() {
                 }
               }}
             >
-              <div className="flex flex-col gap-2">
-                <label className="text-[#BCD7EA] text-sm font-semibold" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
-                  Cédula
+              {/* Cédula */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                  Número de cédula
                 </label>
                 <input
                   type="text"
@@ -514,19 +530,20 @@ export default function HomePage() {
                   placeholder="Ej: 1234567890"
                   value={loginForm.cedula}
                   onChange={(e) => setLoginForm(f => ({ ...f, cedula: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#4A6B8A] text-base font-medium outline-none transition-all duration-200"
+                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
                   style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1.5px solid rgba(0,163,255,0.2)',
+                    background: 'rgba(0,163,255,0.05)',
+                    border: '1.5px solid rgba(0,163,255,0.15)',
                     fontFamily: 'Utile, Arial, sans-serif',
                   }}
-                  onFocus={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.7)')}
-                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.2)')}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[#BCD7EA] text-sm font-semibold" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+              {/* Contraseña */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
                   Contraseña
                 </label>
                 <input
@@ -534,29 +551,35 @@ export default function HomePage() {
                   placeholder="••••••••"
                   value={loginForm.password}
                   onChange={(e) => setLoginForm(f => ({ ...f, password: e.target.value }))}
-                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#4A6B8A] text-base font-medium outline-none transition-all duration-200"
+                  className="w-full rounded-xl px-4 py-3 text-white placeholder-[#2A4A65] text-sm font-medium outline-none transition-all duration-200"
                   style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1.5px solid rgba(0,163,255,0.2)',
+                    background: 'rgba(0,163,255,0.05)',
+                    border: '1.5px solid rgba(0,163,255,0.15)',
                     fontFamily: 'Utile, Arial, sans-serif',
                   }}
-                  onFocus={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.7)')}
-                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,163,255,0.2)')}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.6)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
                 />
               </div>
 
+              {/* Error */}
               {loginError && (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,60,60,0.12)', border: '1px solid rgba(255,60,60,0.3)' }}>
-                  <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
-                  <p className="text-red-400 text-sm font-medium" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>{loginError}</p>
+                <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                  <AlertCircle size={15} className="text-red-400 flex-shrink-0" />
+                  <p className="text-red-400 text-xs font-medium" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>{loginError}</p>
                 </div>
               )}
 
+              {/* Botón */}
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="group relative mt-2 w-full bg-gradient-to-r from-[#00A3FF] to-[#0154AC] hover:from-[#0154AC] hover:to-[#00A3FF] text-white py-3 rounded-xl font-bold text-base transition-all duration-500 transform hover:scale-[1.02] hover:shadow-xl overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
-                style={{ fontFamily: 'Utile, Arial, sans-serif' }}
+                className="group relative mt-1 w-full text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-500 transform hover:scale-[1.02] hover:shadow-2xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                style={{
+                  background: 'linear-gradient(135deg, #00A3FF 0%, #0154AC 100%)',
+                  fontFamily: 'Utile, Arial, sans-serif',
+                  boxShadow: '0 4px 24px rgba(0,163,255,0.3)',
+                }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {loginLoading ? (
@@ -569,13 +592,18 @@ export default function HomePage() {
                     </>
                   ) : (
                     <>
-                      Ingresar
-                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                      Ingresar a Sirius Media
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
                     </>
                   )}
                 </span>
-                <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+                <div className="absolute inset-0 bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
               </button>
+
+              {/* Footer */}
+              <p className="text-center text-[#2A4A65] text-xs mt-1" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
+                Acceso exclusivo para personal autorizado de Sirius
+              </p>
             </form>
           </div>
         </div>

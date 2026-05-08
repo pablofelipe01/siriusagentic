@@ -35,9 +35,12 @@ export function MediaFileCard({ file, onArchive }: MediaFileCardProps) {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden flex flex-col">
+    <div
+      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:scale-[1.02]"
+      style={{ background: 'rgba(0,163,255,0.05)', border: '1px solid rgba(0,163,255,0.15)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+    >
       {/* Thumbnail */}
-      <div className="h-28 bg-black/20 flex items-center justify-center overflow-hidden">
+      <div className="h-28 flex items-center justify-center overflow-hidden relative" style={{ background: 'rgba(0,8,20,0.6)' }}>
         {isImage(file.name) ? (
           <img
             src={file.url}
@@ -46,54 +49,71 @@ export function MediaFileCard({ file, onArchive }: MediaFileCardProps) {
             loading="lazy"
           />
         ) : isVideo(file.name) ? (
-          <FileVideo className="text-blue-300" size={36} />
+          <div className="flex flex-col items-center gap-1">
+            <FileVideo className="text-[#00A3FF]" size={32} />
+            <span className="text-[#4A7FA5] text-[9px] uppercase tracking-wider">Video</span>
+          </div>
         ) : (
-          <FileText className="text-gray-400" size={36} />
+          <div className="flex flex-col items-center gap-1">
+            <FileText className="text-[#4A7FA5]" size={32} />
+            <span className="text-[#4A7FA5] text-[9px] uppercase tracking-wider">Doc</span>
+          </div>
         )}
+        {/* Gradient overlay en la parte inferior de la imagen */}
+        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#000814]/80 to-transparent" />
       </div>
 
       {/* Info */}
-      <div className="p-2 flex flex-col gap-1 flex-1">
-        <p className="text-xs font-medium text-white truncate" title={file.name}>
+      <div className="p-2.5 flex flex-col gap-1 flex-1">
+        <p className="text-xs font-semibold text-white truncate" title={file.name} style={{ fontFamily: 'Utile, Arial, sans-serif' }}>
           {file.name}
         </p>
         {file.autor && (
-          <p className="text-[10px] text-white/60">
-            Por: {file.autor}
+          <p className="text-[10px]" style={{ color: '#4A7FA5' }}>
+            {file.autor}
           </p>
         )}
         {file.fecha && (
-          <p className="text-[10px] text-white/50">{file.fecha}</p>
+          <p className="text-[10px]" style={{ color: 'rgba(74,127,165,0.7)' }}>{file.fecha}</p>
         )}
         {file.descripcion && (
-          <p className="text-[10px] text-white/60 line-clamp-2">{file.descripcion}</p>
+          <p className="text-[10px] line-clamp-2" style={{ color: 'rgba(255,255,255,0.5)' }}>{file.descripcion}</p>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex border-t border-white/10">
+      <div className="flex" style={{ borderTop: '1px solid rgba(0,163,255,0.1)' }}>
         <a
           href={file.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] text-blue-300 hover:bg-white/5 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 py-2 text-[10px] font-medium transition-all duration-200"
+          style={{ color: '#00A3FF' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(0,163,255,0.08)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
         >
-          <ExternalLink size={12} />
+          <ExternalLink size={11} />
           Abrir
         </a>
         <button
           onClick={handleCopy}
-          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] text-white/60 hover:bg-white/5 transition-colors border-l border-white/10"
+          className="flex-1 flex items-center justify-center gap-1 py-2 text-[10px] font-medium transition-all duration-200"
+          style={{ color: copied ? '#00A3FF' : '#4A7FA5', borderLeft: '1px solid rgba(0,163,255,0.1)' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(0,163,255,0.08)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
         >
-          {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+          {copied ? <Check size={11} /> : <Copy size={11} />}
           {copied ? 'Copiado' : 'URL'}
         </button>
         {onArchive && (
           <button
             onClick={() => onArchive(file.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] text-white/40 hover:bg-white/5 hover:text-yellow-400 transition-colors border-l border-white/10"
+            className="flex-1 flex items-center justify-center gap-1 py-2 text-[10px] font-medium transition-all duration-200"
+            style={{ color: '#4A7FA5', borderLeft: '1px solid rgba(0,163,255,0.1)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(251,191,36,0.08)'; (e.currentTarget as HTMLElement).style.color = '#FCD34D' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#4A7FA5' }}
           >
-            <Archive size={12} />
+            <Archive size={11} />
             Archivar
           </button>
         )}

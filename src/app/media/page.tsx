@@ -57,40 +57,48 @@ function UploadModal({ file, autor, onClose, onUpload, isUploading }: UploadModa
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-gray-900 border border-white/20 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h2 className="text-white font-semibold flex items-center gap-2">
-            <FolderOpen size={18} className="text-blue-400" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,8,20,0.85)', backdropFilter: 'blur(12px)' }}>
+      <div className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl" style={{ background: 'linear-gradient(145deg, rgba(10,18,36,0.98) 0%, rgba(1,29,61,0.98) 100%)', border: '1px solid rgba(0,163,255,0.2)', boxShadow: '0 0 60px rgba(0,163,255,0.08), 0 32px 64px rgba(0,0,0,0.5)' }}>
+        {/* Acento superior */}
+        <div className="h-0.5 w-full bg-gradient-to-r from-[#00A3FF] via-[#0154AC] to-[#00A3FF]" />
+
+        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+          <h2 className="text-white font-black flex items-center gap-2.5" style={{ fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-0.3px' }}>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00A3FF]/20 to-[#0154AC]/20 border border-[#00A3FF]/25 flex items-center justify-center">
+              <FolderOpen size={15} className="text-[#00A3FF]" />
+            </div>
             Subir archivo
           </h2>
-          <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
-            <X size={20} />
+          <button onClick={onClose} className="text-[#4A7FA5] hover:text-white transition-all duration-200 p-1.5 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10">
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4">
+        <div className="mx-6 h-px bg-gradient-to-r from-transparent via-[#00A3FF]/20 to-transparent mb-5" />
+
+        <form onSubmit={handleSubmit} className="px-6 pb-6 flex flex-col gap-4">
           {/* File info */}
-          <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-              <Paperclip size={16} className="text-blue-400" />
+          <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.15)' }}>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00A3FF]/20 to-[#0154AC]/20 border border-[#00A3FF]/25 flex items-center justify-center flex-shrink-0">
+              <Paperclip size={16} className="text-[#00A3FF]" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{file.name}</p>
-              <p className="text-white/40 text-xs">{(file.size / 1024).toFixed(1)} KB</p>
+              <p className="text-white text-sm font-semibold truncate" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>{file.name}</p>
+              <p className="text-[#4A7FA5] text-xs">{(file.size / 1024).toFixed(1)} KB</p>
             </div>
           </div>
 
           {/* Carpeta */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-white/70 text-sm">Carpeta destino</label>
+            <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Carpeta destino</label>
             <select
               value={carpeta}
               onChange={(e) => setCarpeta(e.target.value as Carpeta)}
-              className="bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-400"
+              className="rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all duration-200"
+              style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
             >
               {CARPETAS.map((c) => (
-                <option key={c} value={c} className="bg-gray-900">
+                <option key={c} value={c} style={{ background: '#0A1224' }}>
                   {c}
                 </option>
               ))}
@@ -99,35 +107,40 @@ function UploadModal({ file, autor, onClose, onUpload, isUploading }: UploadModa
 
           {/* Descripción */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-white/70 text-sm">Descripción</label>
+            <label className="text-[#7AAECB] text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Descripción</label>
             <textarea
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Describe brevemente el contenido..."
               rows={3}
-              className="bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-blue-400 resize-none"
+              className="rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#2A4A65] outline-none transition-all duration-200 resize-none"
+              style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
             />
           </div>
 
-          {/* Autor (read-only) */}
-          <p className="text-white/40 text-xs">Autor: {autor || 'Anónimo'}</p>
+          {/* Autor */}
+          <p className="text-[#2A4A65] text-xs" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Autor: <span className="text-[#4A7FA5]">{autor || 'Anónimo'}</span></p>
 
           <button
             type="submit"
             disabled={isUploading || !descripcion.trim()}
-            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors"
+            className="group relative w-full text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #00A3FF 0%, #0154AC 100%)', fontFamily: 'Utile, Arial, sans-serif', boxShadow: '0 4px 20px rgba(0,163,255,0.25)' }}
           >
-            {isUploading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Subiendo...
-              </>
-            ) : (
-              <>
-                <Send size={16} />
-                Subir a Pinata
-              </>
-            )}
+            <span className="relative z-10 flex items-center gap-2">
+              {isUploading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Subiendo...
+                </>
+              ) : (
+                <>
+                  <Send size={16} />
+                  Subir a Sirius Media
+                </>
+              )}
+            </span>
+            <div className="absolute inset-0 bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
           </button>
         </form>
       </div>
@@ -160,22 +173,24 @@ function MessageBubble({ msg, onArchive }: BubbleProps) {
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* Avatar */}
       <div
-        className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white ${
-          isUser ? 'bg-blue-600' : 'bg-emerald-700'
-        }`}
+        className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center"
+        style={isUser
+          ? { background: 'linear-gradient(135deg, #00A3FF, #0154AC)', boxShadow: '0 4px 12px rgba(0,163,255,0.3)' }
+          : { background: 'rgba(0,163,255,0.1)', border: '1px solid rgba(0,163,255,0.25)' }
+        }
       >
-        {isUser ? <User size={16} /> : <Bot size={16} />}
+        {isUser ? <User size={15} className="text-white" /> : <Bot size={15} className="text-[#00A3FF]" />}
       </div>
 
-      <div className={`flex flex-col gap-2 max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col gap-1.5 max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Text bubble */}
         {msg.text && (
           <div
-            className={`rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
-              isUser
-                ? 'bg-blue-600 text-white rounded-tr-sm'
-                : 'bg-white/10 text-white/90 rounded-tl-sm'
-            }`}
+            className="rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap"
+            style={isUser
+              ? { background: 'linear-gradient(135deg, #00A3FF, #0154AC)', color: 'white', borderRadius: '18px 4px 18px 18px', boxShadow: '0 4px 16px rgba(0,163,255,0.2)' }
+              : { background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.12)', color: 'rgba(255,255,255,0.9)', borderRadius: '4px 18px 18px 18px', fontFamily: 'Utile, Arial, sans-serif' }
+            }
           >
             {renderMarkdown(msg.text)}
           </div>
@@ -183,7 +198,7 @@ function MessageBubble({ msg, onArchive }: BubbleProps) {
 
         {/* File grid */}
         {msg.files && msg.files.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full max-w-lg">
             {msg.files.map((f) => (
               <MediaFileCard
                 key={f.id}
@@ -195,7 +210,7 @@ function MessageBubble({ msg, onArchive }: BubbleProps) {
         )}
 
         {/* Timestamp */}
-        <span className="text-[10px] text-white/30">
+        <span className="text-[10px]" style={{ color: 'rgba(74,127,165,0.7)', fontFamily: 'Utile, Arial, sans-serif' }}>
           {msg.timestamp.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
@@ -336,33 +351,33 @@ export default function MediaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(160deg, #000814 0%, #001629 50%, #000D1F 100%)' }}>
       {/* Header */}
-      <header className="border-b border-white/10 bg-black/30 backdrop-blur-md px-4 py-3 flex items-center gap-3">
+      <header className="flex items-center gap-3 px-5 py-3.5" style={{ background: 'rgba(0,8,20,0.8)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,163,255,0.12)' }}>
         <Link
           href="/"
-          className="text-white/60 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+          className="text-[#4A7FA5] hover:text-white transition-all duration-200 p-1.5 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10"
         >
-          <Home size={18} />
+          <Home size={17} />
         </Link>
-        <div className="w-px h-5 bg-white/20" />
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-emerald-700 flex items-center justify-center">
-            <Bot size={15} className="text-white" />
+        <div className="w-px h-5" style={{ background: 'rgba(0,163,255,0.2)' }} />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #00A3FF22, #0154AC22)', border: '1px solid rgba(0,163,255,0.25)' }}>
+            <Bot size={15} className="text-[#00A3FF]" />
           </div>
           <div>
-            <p className="text-white text-sm font-semibold leading-none">Agente Multimedia</p>
-            <p className="text-white/40 text-xs">Sirius Regenerative Solutions</p>
+            <p className="text-white text-sm font-black leading-none" style={{ fontFamily: 'Utile, Arial, sans-serif', letterSpacing: '-0.3px' }}>Sirius Media</p>
+            <p className="text-[#4A7FA5] text-xs">Agente multimedia · Sirius Regenerative</p>
           </div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white/50 text-xs">Pinata IPFS</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00A3FF] animate-pulse" />
+          <span className="text-[#4A7FA5] text-xs" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Pinata IPFS</span>
         </div>
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-5 max-w-3xl w-full mx-auto">
+      <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 max-w-3xl w-full mx-auto">
         {messages.map((msg) => (
           <MessageBubble key={msg.id} msg={msg} onArchive={handleArchive} />
         ))}
@@ -370,12 +385,12 @@ export default function MediaPage() {
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
-              <Bot size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #00A3FF22, #0154AC22)', border: '1px solid rgba(0,163,255,0.25)' }}>
+              <Bot size={15} className="text-[#00A3FF]" />
             </div>
-            <div className="bg-white/10 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin text-white/60" />
-              <span className="text-white/60 text-sm">Consultando Pinata…</span>
+            <div className="rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2.5" style={{ background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.12)' }}>
+              <Loader2 size={13} className="animate-spin text-[#00A3FF]" />
+              <span className="text-[#4A7FA5] text-sm" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Consultando Pinata…</span>
             </div>
           </div>
         )}
@@ -383,7 +398,7 @@ export default function MediaPage() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-white/10 bg-black/30 backdrop-blur-md px-4 py-3">
+      <div className="px-4 py-3" style={{ background: 'rgba(0,8,20,0.8)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(0,163,255,0.12)' }}>
         <form
           onSubmit={handleSend}
           className="max-w-3xl mx-auto flex items-center gap-2"
@@ -399,10 +414,10 @@ export default function MediaPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="text-white/50 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+            className="text-[#4A7FA5] hover:text-[#00A3FF] p-2.5 rounded-xl hover:bg-white/10 transition-all duration-200 border border-transparent hover:border-white/10 flex-shrink-0"
             title="Adjuntar archivo"
           >
-            <Paperclip size={20} />
+            <Paperclip size={18} />
           </button>
 
           {/* Text input */}
@@ -412,31 +427,38 @@ export default function MediaPage() {
             onChange={(e) => setInput(e.target.value)}
             placeholder='Ej: "lista fotos de laboratorio" o "busca videos de pirólisis"'
             disabled={isLoading}
-            className="flex-1 bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-blue-400 disabled:opacity-50"
+            className="flex-1 rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all duration-200 disabled:opacity-50"
+            style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.5)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
           />
 
           {/* Send */}
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white p-2.5 rounded-xl transition-colors flex-shrink-0"
+            className="text-white p-2.5 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #00A3FF, #0154AC)', boxShadow: '0 4px 16px rgba(0,163,255,0.3)' }}
           >
-            <Send size={18} />
+            <Send size={17} />
           </button>
         </form>
 
         {/* Quick actions */}
-        <div className="max-w-3xl mx-auto mt-2 flex gap-2 overflow-x-auto pb-1">
+        <div className="max-w-3xl mx-auto mt-2.5 flex gap-2 overflow-x-auto pb-1">
           {[
-            { label: 'Fotos laboratorio', cmd: 'lista fotos de laboratorio' },
-            { label: 'Videos pirólisis', cmd: 'lista videos de pirolisis' },
-            { label: 'Fotos SG-SST', cmd: 'lista fotos de sg-sst' },
-            { label: 'Fotos generales', cmd: 'lista fotos general' },
+            { label: '📸 Fotos laboratorio', cmd: 'lista fotos de laboratorio' },
+            { label: '🎬 Videos pirólisis', cmd: 'lista videos de pirolisis' },
+            { label: '⚠️ Fotos SG-SST', cmd: 'lista fotos de sg-sst' },
+            { label: '🌿 Fotos generales', cmd: 'lista fotos general' },
           ].map(({ label, cmd }) => (
             <button
               key={cmd}
               onClick={() => { setInput(cmd); }}
-              className="whitespace-nowrap text-xs text-white/50 hover:text-white border border-white/15 hover:border-white/30 rounded-full px-3 py-1 transition-colors flex-shrink-0"
+              className="whitespace-nowrap text-xs font-medium transition-all duration-200 hover:scale-105 rounded-full px-3.5 py-1.5 flex-shrink-0"
+              style={{ color: '#4A7FA5', background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#00A3FF'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,163,255,0.4)'; (e.currentTarget as HTMLElement).style.background = 'rgba(0,163,255,0.12)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#4A7FA5'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,163,255,0.15)'; (e.currentTarget as HTMLElement).style.background = 'rgba(0,163,255,0.06)' }}
             >
               {label}
             </button>
