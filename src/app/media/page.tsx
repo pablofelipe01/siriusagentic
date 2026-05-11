@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, FormEvent } from 'react'
+import React, { useState, useRef, useEffect, FormEvent } from 'react'
 import Link from 'next/link'
 import { Home, Send, Paperclip, X, Loader2, FolderOpen, Bot, User } from 'lucide-react'
 import { MediaFileCard, FileResult } from '@/components/MediaFileCard'
@@ -150,23 +150,41 @@ function UploadModal({ file, autor, onClose, onUpload, isUploading }: UploadModa
 
 // ── Message Bubble ─────────────────────────────────────────────────────────────
 
-function renderMarkdown(text: string) {
-  // Simple bold: **text** → <strong>text</strong>
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith('**') && part.endsWith('**') ? (
-      <strong key={i}>{part.slice(2, -2)}</strong>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  )
+function parseInline(text: string): React.ReactNode[] {
+  return text.split(/(\.\*[^*]+\.\*|\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**'))
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    if (part.startsWith('*') && part.endsWith('*'))
+      return <em key={i}>{part.slice(1, -1)}</em>
+    return <span key={i}>{part}</span>
+  })
+}
+
+function renderMarkdown(text: string): React.ReactNode[] {
+  return text.split('\n').flatMap((line, lineIdx, arr) => {
+    const nodes: React.ReactNode[] = []
+    if (line.startsWith('- ') || line.startsWith('\u2022 ')) {
+      nodes.push(
+        <span key={`li-${lineIdx}`} className="flex gap-1.5 items-start">
+          <span className="text-[#00A3FF] flex-shrink-0">•</span>
+          <span>{parseInline(line.slice(2))}</span>
+        </span>
+      )
+    } else {
+      nodes.push(<span key={`l-${lineIdx}`}>{parseInline(line)}</span>)
+    }
+    if (lineIdx < arr.length - 1) nodes.push(<br key={`br-${lineIdx}`} />)
+    return nodes
+  })
 }
 
 interface BubbleProps {
   msg: MediaMessage
   onArchive: (id: string, msgId: string) => void
+  onDelete: (id: string, msgId: string) => void
 }
 
-function MessageBubble({ msg, onArchive }: BubbleProps) {
+function MessageBubble({ msg, onArchive, onDelete }: BubbleProps) {
   const isUser = msg.sender === 'user'
 
   return (
@@ -189,7 +207,7 @@ function MessageBubble({ msg, onArchive }: BubbleProps) {
             className="rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap"
             style={isUser
               ? { background: 'linear-gradient(135deg, #00A3FF, #0154AC)', color: 'white', borderRadius: '18px 4px 18px 18px', boxShadow: '0 4px 16px rgba(0,163,255,0.2)' }
-              : { background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.12)', color: 'rgba(255,255,255,0.9)', borderRadius: '4px 18px 18px 18px', fontFamily: 'Utile, Arial, sans-serif' }
+              : { background: 'rgba(0,8,20,0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(0,163,255,0.15)', color: 'rgba(255,255,255,0.9)', borderRadius: '4px 18px 18px 18px', fontFamily: 'Utile, Arial, sans-serif' }
             }
           >
             {renderMarkdown(msg.text)}
@@ -198,12 +216,13 @@ function MessageBubble({ msg, onArchive }: BubbleProps) {
 
         {/* File grid */}
         {msg.files && msg.files.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full max-w-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-2xl">
             {msg.files.map((f) => (
               <MediaFileCard
                 key={f.id}
                 file={f}
                 onArchive={(id) => onArchive(id, msg.id)}
+                onDelete={(id) => onDelete(id, msg.id)}
               />
             ))}
           </div>
@@ -241,7 +260,7 @@ export default function MediaPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem('userName')
-    if (saved) setUserName(saved)
+    if (saved) setUserName(saved.replace(/[<>"'`]/g, '').trim().slice(0, 50) || 'Anónimo')
   }, [])
 
   useEffect(() => {
@@ -255,9 +274,9 @@ export default function MediaPage() {
     ])
   }
 
-  const handleSend = async (e?: FormEvent) => {
+  const handleSend = async (e?: FormEvent, overrideText?: string) => {
     e?.preventDefault()
-    const text = input.trim()
+    const text = (overrideText ?? input).trim()
     if (!text || isLoading) return
 
     addMessage({ sender: 'user', type: 'text', text })
@@ -350,10 +369,40 @@ export default function MediaPage() {
     }
   }
 
+  const handleDelete = async (fileId: string, _msgId: string) => {
+    try {
+      const res = await fetch('/api/media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', fileId }),
+      })
+      const data = await res.json()
+      addMessage({
+        sender: 'bot',
+        type: 'text',
+        text: data.success ? 'Archivo **eliminado** permanentemente.' : 'Error al eliminar.',
+      })
+    } catch {
+      addMessage({ sender: 'bot', type: 'text', text: 'Error de conexión.' })
+    }
+  }
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(160deg, #000814 0%, #001629 50%, #000D1F 100%)' }}>
+    <div className="min-h-screen flex flex-col relative">
+      {/* ── Background: nature photo + dark overlay ─────────────────────────── */}
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
+        <img
+          src="/DSC_3239.jpg"
+          alt=""
+          className="w-full h-full object-cover object-center"
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(160deg, rgba(0,5,15,0.82) 0%, rgba(0,18,40,0.76) 50%, rgba(0,8,20,0.85) 100%)' }}
+        />
+      </div>
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 py-3.5" style={{ background: 'rgba(0,8,20,0.8)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,163,255,0.12)' }}>
+      <header className="flex items-center gap-3 px-5 py-3.5 relative" style={{ zIndex: 50, background: 'rgba(0,5,15,0.55)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(0,163,255,0.15)' }}>
         <Link
           href="/"
           className="text-[#4A7FA5] hover:text-white transition-all duration-200 p-1.5 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10"
@@ -377,9 +426,9 @@ export default function MediaPage() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 max-w-3xl w-full mx-auto">
+      <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 max-w-3xl w-full mx-auto relative" style={{ zIndex: 10 }}>
         {messages.map((msg) => (
-          <MessageBubble key={msg.id} msg={msg} onArchive={handleArchive} />
+          <MessageBubble key={msg.id} msg={msg} onArchive={handleArchive} onDelete={handleDelete} />
         ))}
 
         {/* Loading indicator */}
@@ -388,7 +437,7 @@ export default function MediaPage() {
             <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #00A3FF22, #0154AC22)', border: '1px solid rgba(0,163,255,0.25)' }}>
               <Bot size={15} className="text-[#00A3FF]" />
             </div>
-            <div className="rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2.5" style={{ background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.12)' }}>
+            <div className="rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2.5" style={{ background: 'rgba(0,8,20,0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(0,163,255,0.15)' }}>
               <Loader2 size={13} className="animate-spin text-[#00A3FF]" />
               <span className="text-[#4A7FA5] text-sm" style={{ fontFamily: 'Utile, Arial, sans-serif' }}>Consultando Pinata…</span>
             </div>
@@ -398,7 +447,7 @@ export default function MediaPage() {
       </div>
 
       {/* Input bar */}
-      <div className="px-4 py-3" style={{ background: 'rgba(0,8,20,0.8)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(0,163,255,0.12)' }}>
+      <div className="px-4 py-3 relative" style={{ zIndex: 50, background: 'rgba(0,5,15,0.55)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderTop: '1px solid rgba(0,163,255,0.15)' }}>
         <form
           onSubmit={handleSend}
           className="max-w-3xl mx-auto flex items-center gap-2"
@@ -427,10 +476,8 @@ export default function MediaPage() {
             onChange={(e) => setInput(e.target.value)}
             placeholder='Ej: "lista fotos de laboratorio" o "busca videos de pirólisis"'
             disabled={isLoading}
-            className="flex-1 rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all duration-200 disabled:opacity-50"
-            style={{ background: 'rgba(0,163,255,0.05)', border: '1.5px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.5)'; e.currentTarget.style.background = 'rgba(0,163,255,0.08)' }}
-            onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,163,255,0.15)'; e.currentTarget.style.background = 'rgba(0,163,255,0.05)' }}
+            className="media-chat-input flex-1 rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all duration-200 disabled:opacity-50"
+            style={{ fontFamily: 'Utile, Arial, sans-serif' }}
           />
 
           {/* Send */}
@@ -454,11 +501,9 @@ export default function MediaPage() {
           ].map(({ label, cmd }) => (
             <button
               key={cmd}
-              onClick={() => { setInput(cmd); }}
-              className="whitespace-nowrap text-xs font-medium transition-all duration-200 hover:scale-105 rounded-full px-3.5 py-1.5 flex-shrink-0"
-              style={{ color: '#4A7FA5', background: 'rgba(0,163,255,0.06)', border: '1px solid rgba(0,163,255,0.15)', fontFamily: 'Utile, Arial, sans-serif' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#00A3FF'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,163,255,0.4)'; (e.currentTarget as HTMLElement).style.background = 'rgba(0,163,255,0.12)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#4A7FA5'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,163,255,0.15)'; (e.currentTarget as HTMLElement).style.background = 'rgba(0,163,255,0.06)' }}
+              onClick={() => handleSend(undefined, cmd)}
+              className="media-quick-action whitespace-nowrap text-xs font-medium transition-all duration-200 hover:scale-105 rounded-full px-3.5 py-1.5 flex-shrink-0"
+              style={{ fontFamily: 'Utile, Arial, sans-serif' }}
             >
               {label}
             </button>

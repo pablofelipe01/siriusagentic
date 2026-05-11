@@ -4,8 +4,42 @@ import {
   buscarArchivos,
   obtenerUrl,
   archivarArchivo,
+  eliminarArchivo,
   listarCarpeta,
 } from '@/agent/mediaAgent'
+
+// ── Rate limiting (in-memory, per IP) ────────────────────────────────────────
+const _rl = new Map<string, { count: number; reset: number }>()
+const RL_WINDOW = 60_000
+const RL_MAX = 30
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const e = _rl.get(ip)
+  if (!e || now > e.reset) { _rl.set(ip, { count: 1, reset: now + RL_WINDOW }); return true }
+  if (e.count >= RL_MAX) return false
+  e.count++
+  return true
+}
+
+// ── Input sanitization ───────────────────────────────────────────────────────
+function sanitize(value: string, maxLen = 200): string {
+  return value.replace(/[<>"'`]/g, '').trim().slice(0, maxLen)
+}
+
+// ── Folder keywords — must not be captured as author in NLP ─────────────────
+const FOLDER_KEYWORDS = new Set([
+  'pirolisis', 'pirólisis', 'laboratorio', 'lab', 'sgsst', 'sg', 'sst',
+  'seguridad', 'general', 'archivado', 'archived', 'video', 'videos', 'foto', 'fotos',
+])
+
+// ── Allowed upload types / sizes ─────────────────────────────────────────────
+const ALLOWED_TYPES = new Set([
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic',
+  'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/mpeg',
+  'application/pdf', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+])
+const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100 MB
 
 type Carpeta =
   | 'fotos/pirolisis'
@@ -41,20 +75,31 @@ function detectarCarpeta(texto: string): Carpeta | undefined {
   return undefined
 }
 
+const ENRICH_LIMIT = 48
+
 function enrichFiles(files: Awaited<ReturnType<typeof listarCarpeta>>) {
-  return files.slice(0, 24).map((f) => ({
-      id: f.id,
-      name: f.name,
-      cid: f.cid,
-      url: obtenerUrl(f.cid),
-      autor: (f.keyvalues as Record<string, string> | undefined)?.autor,
-      descripcion: (f.keyvalues as Record<string, string> | undefined)?.descripcion,
-      fecha: (f.keyvalues as Record<string, string> | undefined)?.fecha,
-      carpeta: (f.keyvalues as Record<string, string> | undefined)?.carpeta,
-    }))
+  return files.slice(0, ENRICH_LIMIT).map((f) => ({
+    id: f.id,
+    name: f.name,
+    cid: f.cid,
+    url: obtenerUrl(f.cid),
+    autor: (f.keyvalues as Record<string, string> | undefined)?.autor,
+    descripcion: (f.keyvalues as Record<string, string> | undefined)?.descripcion,
+    fecha: (f.keyvalues as Record<string, string> | undefined)?.fecha,
+    carpeta: (f.keyvalues as Record<string, string> | undefined)?.carpeta,
+  }))
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit check
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Demasiadas solicitudes. Intenta en un minuto.' }, { status: 429 })
+  }
+
   try {
     const contentType = request.headers.get('content-type') ?? ''
 
@@ -72,8 +117,17 @@ export async function POST(request: NextRequest) {
       if (!CARPETAS_VALIDAS.includes(carpeta as Carpeta)) {
         return NextResponse.json({ error: 'Carpeta inválida' }, { status: 400 })
       }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({ error: 'El archivo supera el límite de 100 MB.' }, { status: 400 })
+      }
+      if (!ALLOWED_TYPES.has(file.type)) {
+        return NextResponse.json({ error: 'Tipo de archivo no permitido.' }, { status: 400 })
+      }
 
-      const result = await subirArchivo(file, carpeta as Carpeta, { autor, descripcion })
+      const safeAutor = sanitize(autor, 80)
+      const safeDesc  = sanitize(descripcion, 300)
+
+      const result = await subirArchivo(file, carpeta as Carpeta, { autor: safeAutor, descripcion: safeDesc })
       const url = obtenerUrl(result.cid)
 
       return NextResponse.json({
@@ -111,7 +165,7 @@ export async function POST(request: NextRequest) {
           })
         }
         const files = await listarCarpeta(carpetaDetectada)
-        const enriched = await enrichFiles(files)
+        const enriched = enrichFiles(files)
         return NextResponse.json({
           action: 'list',
           carpeta: carpetaDetectada,
@@ -125,10 +179,13 @@ export async function POST(request: NextRequest) {
 
       // SEARCH
       if (/busca|buscar|encuentra|encontrar|filtra/.test(t)) {
-        const matchDe = t.match(/(?:de|por)\s+([a-záéíóúüñ]+)/i)
-        const autorBuscado = matchDe?.[1]
+        // Extract author only if the word after 'de/por' is not a folder keyword
+        const matches = [...t.matchAll(/(?:de|por)\s+([a-záéíóúüñ]+)/gi)]
+        const autorBuscado = matches
+          .map(m => m[1].toLowerCase())
+          .find(w => !FOLDER_KEYWORDS.has(w))
         const result = await buscarArchivos({ carpeta: carpetaDetectada, autor: autorBuscado })
-        const enriched = await enrichFiles(result)
+        const enriched = enrichFiles(result)
         return NextResponse.json({
           action: 'search',
           files: enriched,
@@ -175,18 +232,23 @@ export async function POST(request: NextRequest) {
         if (!carpeta || !CARPETAS_VALIDAS.includes(carpeta as Carpeta))
           return NextResponse.json({ error: 'Carpeta inválida' }, { status: 400 })
         const files = await listarCarpeta(carpeta as Carpeta)
-        const enriched = await enrichFiles(files)
+        const enriched = enrichFiles(files)
         return NextResponse.json({ action: 'list', carpeta, files: enriched })
       }
       case 'search': {
         const result = await buscarArchivos({ carpeta: carpeta as Carpeta | undefined, autor, nombre })
-        const enriched = await enrichFiles(result)
+        const enriched = enrichFiles(result)
         return NextResponse.json({ action: 'search', files: enriched })
       }
       case 'archive': {
         if (!fileId) return NextResponse.json({ error: 'fileId requerido' }, { status: 400 })
         await archivarArchivo(fileId)
         return NextResponse.json({ action: 'archive', success: true })
+      }
+      case 'delete': {
+        if (!fileId) return NextResponse.json({ error: 'fileId requerido' }, { status: 400 })
+        await eliminarArchivo(fileId)
+        return NextResponse.json({ action: 'delete', success: true })
       }
       case 'url': {
         if (!cid) return NextResponse.json({ error: 'cid requerido' }, { status: 400 })

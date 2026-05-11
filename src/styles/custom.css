@@ -1,4 +1,27 @@
 /* Estilos para el formulario de login */
+
+/* ── Media page ──────────────────────────────────────────── */
+.media-quick-action {
+  color: #4A7FA5;
+  background: rgba(0, 163, 255, 0.06);
+  border: 1px solid rgba(0, 163, 255, 0.15);
+}
+.media-quick-action:hover {
+  color: #00A3FF;
+  background: rgba(0, 163, 255, 0.12);
+  border-color: rgba(0, 163, 255, 0.4);
+}
+
+.media-chat-input {
+  background: rgba(0, 163, 255, 0.05);
+  border: 1.5px solid rgba(0, 163, 255, 0.15);
+}
+.media-chat-input:focus {
+  background: rgba(0, 163, 255, 0.08);
+  border-color: rgba(0, 163, 255, 0.5);
+}
+/* ─────────────────────────────────────────────────────────── */
+
 .login-container {
     display: flex;
     justify-content: center;

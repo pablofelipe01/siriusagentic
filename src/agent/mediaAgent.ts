@@ -75,7 +75,13 @@ export async function archivarArchivo(fileId: string) {
   return await pinata.files.public.update({
     id: fileId,
     group_id: GRUPOS["archived"],
+    keyvalues: { archived: new Date().toISOString() },
   });
+}
+
+// 🗑️ ELIMINAR un archivo permanentemente
+export async function eliminarArchivo(fileId: string) {
+  return await pinata.files.public.delete([fileId]);
 }
 
 // 📋 LISTAR todos los archivos de una carpeta
