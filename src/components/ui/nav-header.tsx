@@ -27,7 +27,8 @@ function NavHeader({ sections, activeSection, onNavigate }: NavHeaderProps) {
       onMouseLeave={() => setPosition((pv) => ({ ...pv, opacity: 0 }))}
       style={{
         scrollbarWidth: 'none',
-        msOverflowStyle: 'none'
+        msOverflowStyle: 'none',
+        WebkitOverflowScrolling: 'touch'
       }}
     >
       {sections.map(({ id, label }) => (
@@ -72,7 +73,7 @@ const Tab = ({
         });
       }}
       onClick={onClick}
-      className={`relative z-10 block cursor-pointer whitespace-nowrap flex-shrink-0 px-2.5 py-1.5 text-[10px] uppercase sm:px-3 sm:py-2 sm:text-xs lg:px-5 lg:py-3 lg:text-base transition-colors duration-300 ${
+      className={`relative z-10 block cursor-pointer whitespace-nowrap flex-shrink-0 px-2 py-1.5 text-[9px] uppercase sm:px-2.5 sm:py-2 sm:text-[10px] md:px-3 md:text-xs lg:px-4 lg:text-sm xl:px-5 xl:py-3 xl:text-base transition-colors duration-300 ${
         isActive ? "text-white/90" : "text-white/70 hover:text-white/90"
       }`}
       style={{
@@ -90,7 +91,7 @@ const Cursor = ({ position }: { position: { left: number; width: number; opacity
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-6 rounded-full sm:h-7 lg:h-12"
+      className="absolute z-0 h-5 rounded-full sm:h-6 md:h-7 lg:h-9 xl:h-12"
       style={{
         background: "rgba(255, 255, 255, 0.15)",
         backdropFilter: "blur(8px)",

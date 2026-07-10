@@ -223,10 +223,32 @@ export default function HomePage() {
     }
   ]
 
-  const navSections = [
-    // Eliminado 'main-hero', ahora solo las secciones dinámicas
-    ...customSections.filter(s => s.id !== 'about').map(s => ({ id: s.id, label: s.label }))
-  ]
+  // Usar hook para determinar el ancho de la pantalla
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const navSections = customSections
+    .filter(s => s.id !== 'about')
+    .map(s => ({
+      id: s.id,
+      label: isMobile
+        ? (s.id === 'aplicaciones' ? 'Apps Admin'
+          : s.id === 'aplicaciones-tecnicas' ? 'Apps Técnicas'
+          : s.id === 'guaicaramo' ? 'Guaicaramo'
+          : s.id === 'sirius-media' ? 'Sirius Media'
+          : s.id === 'alma' ? 'Alma'
+          : s.id === 'sirius-agentic' ? 'Sirius Agentic'
+          : s.label)
+        : s.label
+    }))
 
   const navbarOpacity = Math.min(scrollY / 100, 0.95)
 
@@ -249,24 +271,24 @@ export default function HomePage() {
           WebkitBackdropFilter: 'none',
         }}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 xl:px-10 py-3 sm:py-4 xl:py-6">
-          <img
-            src="/logo.png"
-            alt="Sirius Logo"
-            className="w-36 sm:w-40 md:w-44 lg:w-48 xl:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105"
-            style={{ minWidth: 120 }}
-          />
+        <div className="flex flex-col lg:flex-row items-center justify-between px-4 sm:px-6 xl:px-10 py-3 sm:py-4 xl:py-6 gap-3 lg:gap-0">
+          <div className="flex items-center justify-between w-full lg:w-auto">
+            <img
+              src="/logo.png"
+              alt="Sirius Logo"
+              className="w-36 sm:w-40 md:w-44 lg:w-48 xl:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105"
+              style={{ minWidth: 120 }}
+            />
+            <button
+              className="lg:hidden text-[#BCD7EA] hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
 
-          {/* Menú hamburguesa - pantallas pequeñas y medianas */}
-          <button
-            className="xl:hidden text-[#BCD7EA] hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-
-          {/* Desktop nav - solo pantallas grandes */}
-          <nav className="hidden xl:flex items-center">
+          {/* Nav para móvil (desplegable) y desktop (siempre visible) */}
+          <nav className={`${isMenuOpen ? 'flex' : 'hidden'} lg:flex items-center w-full lg:w-auto justify-center`}>
             <NavHeader
               sections={navSections}
               activeSection={activeSection}
@@ -274,43 +296,6 @@ export default function HomePage() {
             />
           </nav>
         </div>
-
-        {/* Mobile/tablet menu dropdown */}
-        {isMenuOpen && (
-          <div
-            className="xl:hidden fixed inset-0 z-40 pt-20"
-            style={{
-              background: 'rgba(0, 8, 20, 0.97)',
-              backdropFilter: 'blur(12px)',
-            }}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <nav className="flex flex-col items-center justify-start pt-8 px-6 gap-2">
-              {navSections.map((section) => (
-                <button
-                  key={section.id}
-                  onClick={() => {
-                    handleSectionNavigation(section.id);
-                    setIsMenuOpen(false);
-                  }}
-                  className={`w-full max-w-sm px-6 py-4 rounded-xl text-left font-bold uppercase tracking-wide transition-all duration-300 ${
-                    activeSection === section.id
-                      ? 'bg-white/20 text-white shadow-lg'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
-                  }`}
-                  style={{
-                    fontFamily: 'Utile, Arial, sans-serif',
-                    fontSize: '0.95rem',
-                    letterSpacing: '0.5px',
-                    border: activeSection === section.id ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.05)',
-                  }}
-                >
-                  {section.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </header>
 
       {/* Main Content */}
