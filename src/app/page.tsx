@@ -239,7 +239,7 @@ export default function HomePage() {
       </audio>
 
       {/* Header */}
-      <header 
+      <header
         ref={headerRef}
         className="fixed top-0 left-0 right-0 z-50"
         style={{
@@ -249,23 +249,24 @@ export default function HomePage() {
           WebkitBackdropFilter: 'none',
         }}
       >
-        <div className="flex flex-col lg:flex-row items-center justify-between px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-6 gap-4 lg:gap-0">
-          <div className="flex items-center justify-between w-full lg:w-auto">
-            <img 
-              src="/logo.png" 
-              alt="Sirius Logo" 
-              className="w-32 sm:w-40 md:w-48 lg:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105" 
-              style={{ minWidth: 60 }} 
-            />
-            <button 
-              className="lg:hidden text-[#BCD7EA] hover:text-[#00A3FF] transition-colors p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-          
-          <nav className={`${isMenuOpen ? 'flex' : 'hidden'} lg:flex items-center w-full lg:w-auto transition-all duration-300`}>
+        <div className="flex items-center justify-between px-3 sm:px-4 lg:px-10 py-2 sm:py-3 lg:py-6">
+          <img
+            src="/logo.png"
+            alt="Sirius Logo"
+            className="w-28 sm:w-32 md:w-40 lg:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105"
+            style={{ minWidth: 60 }}
+          />
+
+          {/* Menú hamburguesa - solo móviles */}
+          <button
+            className="lg:hidden text-[#BCD7EA] hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center">
             <NavHeader
               sections={navSections}
               activeSection={activeSection}
@@ -273,6 +274,43 @@ export default function HomePage() {
             />
           </nav>
         </div>
+
+        {/* Mobile menu dropdown */}
+        {isMenuOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-40 pt-16"
+            style={{
+              background: 'rgba(0, 8, 20, 0.97)',
+              backdropFilter: 'blur(12px)',
+            }}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <nav className="flex flex-col items-center justify-start pt-8 px-6 gap-2">
+              {navSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => {
+                    handleSectionNavigation(section.id);
+                    setIsMenuOpen(false);
+                  }}
+                  className={`w-full max-w-sm px-6 py-4 rounded-xl text-left font-bold uppercase tracking-wide transition-all duration-300 ${
+                    activeSection === section.id
+                      ? 'bg-white/20 text-white shadow-lg'
+                      : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
+                  style={{
+                    fontFamily: 'Utile, Arial, sans-serif',
+                    fontSize: '0.95rem',
+                    letterSpacing: '0.5px',
+                    border: activeSection === section.id ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -763,7 +801,7 @@ export default function HomePage() {
         * {
           box-sizing: border-box;
         }
-        
+
         html, body {
           margin: 0;
           padding: 0;
@@ -772,32 +810,43 @@ export default function HomePage() {
           overflow-x: hidden;
           scroll-behavior: smooth;
         }
-        
+
         body {
           font-family: 'Utile', Arial, sans-serif;
           background: linear-gradient(135deg, #0154AC 0%, #00A3FF 100%);
         }
-        
+
         .container {
           max-width: 1200px;
           margin: 0 auto;
         }
-        
+
+        /* Scrollbar principal de la página */
         ::-webkit-scrollbar {
           width: 12px;
         }
-        
+
         ::-webkit-scrollbar-track {
           background: rgba(188, 215, 234, 0.1);
         }
-        
+
         ::-webkit-scrollbar-thumb {
           background: linear-gradient(135deg, #0154AC, #00A3FF);
           border-radius: 6px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(135deg, #00A3FF, #0154AC);
+        }
+
+        /* Ocultar scrollbar del navbar */
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
         
         @keyframes fade-in-up {

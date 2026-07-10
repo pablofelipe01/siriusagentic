@@ -23,8 +23,12 @@ function NavHeader({ sections, activeSection, onNavigate }: NavHeaderProps) {
 
   return (
     <ul
-      className="relative mx-auto flex w-fit rounded-full border-2 border-white/30 bg-black/50 backdrop-blur-md p-1"
+      className="relative mx-auto flex w-fit max-w-full rounded-full border-2 border-white/30 bg-black/50 backdrop-blur-md p-1 overflow-x-auto overflow-y-visible scrollbar-hide"
       onMouseLeave={() => setPosition((pv) => ({ ...pv, opacity: 0 }))}
+      style={{
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
+      }}
     >
       {sections.map(({ id, label }) => (
         <Tab
@@ -68,10 +72,14 @@ const Tab = ({
         });
       }}
       onClick={onClick}
-      className={`relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase mix-blend-difference md:px-5 md:py-3 md:text-base transition-colors duration-200 ${
-        isActive ? "text-[#00A3FF]" : "text-white"
+      className={`relative z-10 block cursor-pointer whitespace-nowrap flex-shrink-0 px-2.5 py-1.5 text-[10px] uppercase sm:px-3 sm:py-2 sm:text-xs lg:px-5 lg:py-3 lg:text-base transition-colors duration-300 ${
+        isActive ? "text-white/90" : "text-white/70 hover:text-white/90"
       }`}
-      style={{ fontFamily: "Utile, Arial, sans-serif", fontWeight: 700, letterSpacing: "-0.5px" }}
+      style={{
+        fontFamily: "Utile, Arial, sans-serif",
+        fontWeight: 700,
+        letterSpacing: "-0.3px"
+      }}
     >
       {children}
     </li>
@@ -82,7 +90,12 @@ const Cursor = ({ position }: { position: { left: number; width: number; opacity
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-7 rounded-full bg-white md:h-12"
+      className="absolute z-0 h-6 rounded-full sm:h-7 lg:h-12"
+      style={{
+        background: "rgba(255, 255, 255, 0.15)",
+        backdropFilter: "blur(8px)",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.2)"
+      }}
     />
   );
 };
