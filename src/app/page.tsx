@@ -249,24 +249,24 @@ export default function HomePage() {
           WebkitBackdropFilter: 'none',
         }}
       >
-        <div className="flex items-center justify-between px-3 sm:px-4 lg:px-10 py-2 sm:py-3 lg:py-6">
+        <div className="flex items-center justify-between px-4 sm:px-6 xl:px-10 py-3 sm:py-4 xl:py-6">
           <img
             src="/logo.png"
             alt="Sirius Logo"
-            className="w-28 sm:w-32 md:w-40 lg:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105"
-            style={{ minWidth: 60 }}
+            className="w-36 sm:w-40 md:w-44 lg:w-48 xl:w-56 h-auto object-contain transition-transform duration-300 hover:scale-105"
+            style={{ minWidth: 120 }}
           />
 
-          {/* Menú hamburguesa - solo móviles */}
+          {/* Menú hamburguesa - pantallas pequeñas y medianas */}
           <button
-            className="lg:hidden text-[#BCD7EA] hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+            className="xl:hidden text-[#BCD7EA] hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
 
-          {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center">
+          {/* Desktop nav - solo pantallas grandes */}
+          <nav className="hidden xl:flex items-center">
             <NavHeader
               sections={navSections}
               activeSection={activeSection}
@@ -275,10 +275,10 @@ export default function HomePage() {
           </nav>
         </div>
 
-        {/* Mobile menu dropdown */}
+        {/* Mobile/tablet menu dropdown */}
         {isMenuOpen && (
           <div
-            className="lg:hidden fixed inset-0 z-40 pt-16"
+            className="xl:hidden fixed inset-0 z-40 pt-20"
             style={{
               background: 'rgba(0, 8, 20, 0.97)',
               backdropFilter: 'blur(12px)',
