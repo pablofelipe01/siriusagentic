@@ -165,7 +165,8 @@ export default function HomePage() {
         { text: 'Proveedores de venta de insumos', route: 'https://airtable.com/appBNCVj4Njbyu1En/pagrXNjIdQxaVrx7W/edit' },
         { text: 'Sirius Coins', route: 'https://airtable.com/app5o1BKy3divPinG/pagGWVLIk07fYaiuo/form' },
         { text: 'Herramienta Financiera', route: 'https://sirius-financiero.vercel.app/' },
-        { text: 'Sirius Laborales', route: 'https://sirius-laborales.vercel.app/' }
+        { text: 'Sirius Laborales', route: 'https://sirius-laborales.vercel.app/' },
+        { text: 'Gestión del Ser', route: 'https://sirius-gestion-del-ser.vercel.app/' }
       ]
     },
     {
