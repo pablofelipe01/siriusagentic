@@ -16,6 +16,9 @@
 import React, { useState } from 'react'
 import { Check, ChevronDown, Loader2, ShieldCheck, Sprout } from 'lucide-react'
 import CanvasFirma from '@/components/eventos/CanvasFirma'
+import Globe from '@/components/ui/globe'
+import FondoAnimado from '@/components/eventos/FondoAnimado'
+import EfectoAgua from '@/components/eventos/EfectoAgua'
 import { EVENTO, TIPOS_DOCUMENTO, GRADOS, POLITICA } from '@/lib/eventos/config'
 
 const FUENTE = 'var(--font-geist-sans), system-ui, -apple-system, sans-serif'
@@ -282,17 +285,12 @@ function Pantalla({ children }: { children: React.ReactNode }) {
       className="relative min-h-screen overflow-hidden bg-[#070B12] text-[#E8EEF4]"
       style={{ fontFamily: FUENTE }}
     >
-      {/* Halo azul detras de la cabecera. Puramente decorativo. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[420px]"
-        style={{
-          background:
-            'radial-gradient(60% 100% at 50% 0%, rgba(0,163,255,0.16) 0%, rgba(0,163,255,0.04) 45%, transparent 75%)',
-        }}
-      />
+      {/* Capas decorativas, ambas por debajo del contenido y sin capturar
+          eventos: el formulario se sigue usando exactamente igual. */}
+      <FondoAnimado />
+      <EfectoAgua />
 
-      <main className="relative mx-auto w-full max-w-xl px-5 pb-24 pt-14 sm:pt-20">
+      <main className="relative z-10 mx-auto w-full max-w-xl px-5 pb-24 pt-14 sm:pt-20">
         <header className="text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -300,7 +298,14 @@ function Pantalla({ children }: { children: React.ReactNode }) {
             alt="Sirius Regenerative Solutions"
             className="mx-auto h-14 w-auto object-contain sm:h-[72px]"
           />
-          <p className="mt-8 text-[11px] font-medium uppercase tracking-[0.22em] text-[#00A3FF]">
+
+          {/* Decorativo: la jornada va de suelos y restauracion, y el globo da
+              ese contexto sin gastarle una linea de texto al estudiante. */}
+          <div className="mt-10 flex justify-center">
+            <Globe size={190} seguirCursor />
+          </div>
+
+          <p className="mt-10 text-[11px] font-medium uppercase tracking-[0.22em] text-[#00A3FF]">
             Registro de asistencia
           </p>
           <p className="mt-3 text-[13px] text-[#8FA3B5]">{EVENTO.institucion}</p>
