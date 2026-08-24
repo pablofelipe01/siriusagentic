@@ -166,7 +166,8 @@ export default function HomePage() {
         { text: 'Sirius Coins', route: 'https://airtable.com/app5o1BKy3divPinG/pagGWVLIk07fYaiuo/form' },
         { text: 'Herramienta Financiera', route: 'https://sirius-financiero.vercel.app/' },
         { text: 'Sirius Laborales', route: 'https://sirius-laborales.vercel.app/' },
-        { text: 'Gestión del Ser', route: 'https://sirius-gestion-del-ser.vercel.app/' }
+        { text: 'Gestión del Ser', route: 'https://sirius-gestion-del-ser.vercel.app/' },
+        { text: 'Encuestas de Tecnología', route: '/encuestas' }
       ]
     },
     {

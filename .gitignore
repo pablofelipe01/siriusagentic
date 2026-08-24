@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# plantilla de variables de entorno (sin valores reales)
+!.env.encuestas.example
+.env.encuestas.example
