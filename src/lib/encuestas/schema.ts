@@ -48,7 +48,7 @@ export const C2_AREAS_USO = [
   'Otro',
 ] as const
 
-export const C3_PLAN = ['Claude Max', 'Claude Pro', 'Versión gratuita', 'No lo uso'] as const
+export const C3_PLAN = ['Claude Max', 'Claude Pro', 'No lo uso'] as const
 
 export const C5_FUNCIONES = [
   'Claude Code',
