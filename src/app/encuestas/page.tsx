@@ -6,6 +6,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import Dashboard from '@/components/encuestas/Dashboard'
 
 export const metadata: Metadata = {
   title: 'Encuestas de Tecnología · Sirius',
@@ -102,6 +103,8 @@ export default function EncuestasPage() {
             </li>
           ))}
         </ol>
+
+        <Dashboard />
       </main>
     </div>
   )
