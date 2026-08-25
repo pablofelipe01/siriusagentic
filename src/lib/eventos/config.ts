@@ -27,6 +27,23 @@ export const EVENTO = {
     'Vas a fortalecer tus conocimientos sobre conservación y regeneración de suelos, restauración ecológica y aprovechamiento de residuos orgánicos, y a participar directamente en la recuperación del entorno de tu colegio.',
 } as const
 
+// ── Interruptor del formulario ───────────────────────────────────────────────
+//
+// Cuando la jornada termina (o se aplaza) se pone en false: la pagina deja de
+// mostrar el formulario y la ruta de API rechaza cualquier envio, incluso uno
+// hecho a mano contra el endpoint. Los registros ya guardados no se tocan.
+//
+// Se deja como constante y no como variable de entorno a proposito: el estado
+// del formulario queda versionado en el repo, visible en el historial.
+export const INSCRIPCIONES_ABIERTAS = false
+
+/** Mensaje que ve quien abre el link con las inscripciones cerradas. */
+export const CIERRE = {
+  titulo: 'Registro cerrado',
+  detalle:
+    'El registro de asistencia para esta jornada ya no está disponible. Si necesitas ayuda con tu inscripción, escribe a david@siriusregenerative.com.',
+} as const
+
 export const TIPOS_DOCUMENTO = ['TI', 'CC', 'CE', 'PPT', 'Pasaporte'] as const
 export const GRADOS = ['9', '10', '11'] as const
 

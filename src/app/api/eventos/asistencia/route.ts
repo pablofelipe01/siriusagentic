@@ -29,6 +29,8 @@ import {
   POLITICA,
   ESTADO_INICIAL,
   ORIGEN_FORMULARIO,
+  INSCRIPCIONES_ABIERTAS,
+  CIERRE,
 } from '@/lib/eventos/config'
 
 export const dynamic = 'force-dynamic'
@@ -59,6 +61,13 @@ function error(texto: string, status: number, headers?: Record<string, string>) 
 }
 
 export async function POST(request: Request) {
+  // Interruptor duro: con las inscripciones cerradas no se crea nada, aunque el
+  // envio venga de una pestana vieja o de curl. Va antes del rate limit para no
+  // gastarle cupo a nadie por un rechazo seguro.
+  if (!INSCRIPCIONES_ABIERTAS) {
+    return error(CIERRE.detalle, 403)
+  }
+
   const veredicto = permitir(clientIp(request))
   if (!veredicto.permitido) {
     // Retry-After le dice al navegador (y a un cliente honesto) cuando volver,

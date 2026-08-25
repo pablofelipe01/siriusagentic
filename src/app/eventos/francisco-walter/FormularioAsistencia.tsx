@@ -14,12 +14,19 @@
 //    firma lo que ya se leyo.
 
 import React, { useState } from 'react'
-import { Check, ChevronDown, Loader2, ShieldCheck, Sprout } from 'lucide-react'
+import { Check, ChevronDown, Loader2, Lock, ShieldCheck, Sprout } from 'lucide-react'
 import CanvasFirma from '@/components/eventos/CanvasFirma'
 import Globe from '@/components/ui/globe'
 import FondoAnimado from '@/components/eventos/FondoAnimado'
 import EfectoAgua from '@/components/eventos/EfectoAgua'
-import { EVENTO, TIPOS_DOCUMENTO, GRADOS, POLITICA } from '@/lib/eventos/config'
+import {
+  EVENTO,
+  TIPOS_DOCUMENTO,
+  GRADOS,
+  POLITICA,
+  INSCRIPCIONES_ABIERTAS,
+  CIERRE,
+} from '@/lib/eventos/config'
 
 const FUENTE = 'var(--font-geist-sans), system-ui, -apple-system, sans-serif'
 
@@ -29,6 +36,33 @@ const CAMPO =
 const CORREO_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 export default function FormularioAsistencia() {
+  // Inscripciones cerradas: no se monta el formulario. Es una constante, no
+  // estado, asi que el orden de los hooks de Formulario nunca cambia entre
+  // renders. La API tambien rechaza los envios, por si alguien guardo la
+  // pagina abierta antes del cierre.
+  if (!INSCRIPCIONES_ABIERTAS) return <PantallaCerrada />
+  return <Formulario />
+}
+
+function PantallaCerrada() {
+  return (
+    <Pantalla invitacion={false}>
+      <div className="mt-10 rounded-2xl border border-white/[0.08] bg-white/[0.015] px-7 py-10 text-center sm:px-10">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.04]">
+          <Lock className="h-5 w-5 text-[#8FA3B5]" />
+        </span>
+        <h2 className="mt-6 text-[22px] font-semibold tracking-[-0.01em] text-white">
+          {CIERRE.titulo}
+        </h2>
+        <p className="mx-auto mt-3.5 max-w-[44ch] text-[15px] leading-relaxed text-[#B9C7D4]">
+          {CIERRE.detalle}
+        </p>
+      </div>
+    </Pantalla>
+  )
+}
+
+function Formulario() {
   const [nombre, setNombre] = useState('')
   const [tipoDocumento, setTipoDocumento] = useState<string>('TI')
   const [documento, setDocumento] = useState('')
@@ -279,7 +313,15 @@ export default function FormularioAsistencia() {
 
 // ── Estructura de la pagina ──────────────────────────────────────────────────
 
-function Pantalla({ children }: { children: React.ReactNode }) {
+function Pantalla({
+  children,
+  // Con las inscripciones cerradas se omiten la descripcion y el "de que se
+  // trata": ambos textos invitan a registrarse, y ya no se puede.
+  invitacion = true,
+}: {
+  children: React.ReactNode
+  invitacion?: boolean
+}) {
   return (
     <div
       className="relative min-h-screen overflow-hidden bg-[#070B12] text-[#E8EEF4]"
@@ -312,22 +354,26 @@ function Pantalla({ children }: { children: React.ReactNode }) {
           <h1 className="mt-4 text-[28px] font-semibold leading-[1.15] tracking-[-0.025em] sm:text-[36px]">
             {EVENTO.nombre}
           </h1>
-          <p className="mx-auto mt-4 max-w-[46ch] text-[15px] leading-relaxed text-[#8FA3B5]">
-            {EVENTO.descripcion}
-          </p>
+          {invitacion && (
+            <p className="mx-auto mt-4 max-w-[46ch] text-[15px] leading-relaxed text-[#8FA3B5]">
+              {EVENTO.descripcion}
+            </p>
+          )}
         </header>
 
         {/* Proposito de la actividad: el estudiante decide si viene sabiendo a
             que viene, no solo cuando y donde. */}
-        <div className="mt-9 flex gap-3.5 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 text-left">
-          <Sprout className="mt-[3px] h-4 w-4 shrink-0 text-[#00A3FF]" />
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#B9C7D4]">
-              De qué se trata
-            </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#8FA3B5]">{EVENTO.proposito}</p>
+        {invitacion && (
+          <div className="mt-9 flex gap-3.5 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 text-left">
+            <Sprout className="mt-[3px] h-4 w-4 shrink-0 text-[#00A3FF]" />
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#B9C7D4]">
+                De qué se trata
+              </p>
+              <p className="mt-2 text-[13px] leading-relaxed text-[#8FA3B5]">{EVENTO.proposito}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {children}
 
