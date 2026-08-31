@@ -158,7 +158,7 @@ export default function HomePage() {
       title: 'Aplicaciones administrativas',
       content: `Desarrollamos herramientas internas y plataformas a medida que conectan datos, personas y procesos. Desde gestión documental hasta automatización de flujos, nuestras apps están diseñadas para la eficiencia y la transparencia.`,
       apps: [
-        { text: 'Novedades de nómina', route: 'https://novedadesnomina.s3.us-east-1.amazonaws.com/Index_Novedades_Nomina.html' },
+        // { text: 'Novedades de nómina', route: 'https://novedadesnomina.s3.us-east-1.amazonaws.com/Index_Novedades_Nomina.html' },
         { text: 'AUTOMA (Financiero)', route: 'https://t.me/AUT0MA_bot' },
         { text: 'Solicitudes de compras', route: 'https://sirius-financiero.vercel.app/' },
         { text: 'Proveedores contratistas', route: 'https://proveedores-gamma.vercel.app/' },
