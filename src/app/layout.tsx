@@ -14,8 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.siriusagentic.com"),
   title: "Sirius Agentic",
   description: "The Future of AI Swarm Technology",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Sirius Agentic",
+    description: "The Future of AI Swarm Technology",
+    url: "https://www.siriusagentic.com",
+    siteName: "Sirius Agentic",
+    type: "website",
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
